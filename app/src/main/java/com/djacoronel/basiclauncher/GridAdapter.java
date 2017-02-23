@@ -33,7 +33,6 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
             super(itemView);
             label = (TextView) itemView.findViewById(R.id.item_app_label);
             icon = (ImageView) itemView.findViewById(R.id.item_app_icon);
-
             itemView.setOnClickListener(
                     new View.OnClickListener() {
                         @Override
@@ -65,6 +64,9 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.app_detail, parent, false);
+
+        int height = parent.getMeasuredHeight() / 6;
+        v.setMinimumHeight(height);
         return new ViewHolder(v);
     }
 

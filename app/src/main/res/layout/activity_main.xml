@@ -5,6 +5,8 @@
     android:background="@android:color/background_dark"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     tools:context="com.djacoronel.basiclauncher.MainActivity">
 
     <include
