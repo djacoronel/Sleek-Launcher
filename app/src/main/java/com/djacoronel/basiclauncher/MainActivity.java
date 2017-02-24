@@ -1,7 +1,10 @@
 package com.djacoronel.basiclauncher;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
@@ -36,6 +39,18 @@ public class MainActivity extends Activity {
         decorView = getWindow().getDecorView();
         loadApps();
         loadAppGrid();
+
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadApps();
+                loadAppGrid();
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        registerReceiver(br, intentFilter);
     }
 
     @Override

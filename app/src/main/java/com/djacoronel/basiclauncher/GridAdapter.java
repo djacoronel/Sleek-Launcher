@@ -1,9 +1,12 @@
 package com.djacoronel.basiclauncher;
 
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -54,6 +57,35 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                             optsBundle = opts != null ? opts.toBundle() : null;
 
                             mContext.startActivity(i, optsBundle);
+                        }
+                    }
+            );
+            itemView.setOnLongClickListener(
+                    new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            AlertDialog dialog = new AlertDialog.Builder(mContext)
+                                    .setTitle("Options")
+                                    .setMessage("Uninstall or hide the app?")
+                                    .setCancelable(true)
+                                    .setPositiveButton("Uninstall", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Uri packageUri = Uri.parse("package:" + apps.get(getAdapterPosition()).name.toString());
+                                            Intent uninstallIntent =
+                                                    new Intent(Intent.ACTION_DELETE, packageUri);
+                                            mContext.startActivity(uninstallIntent);
+                                        }
+                                    })
+                                    .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .create();
+                            dialog.show();
+                            return false;
                         }
                     }
             );
