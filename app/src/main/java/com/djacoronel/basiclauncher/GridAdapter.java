@@ -80,7 +80,10 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                                     .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-
+                                            DbHelper dbHelper = new DbHelper(mContext);
+                                            dbHelper.addToHidden(apps.get(getAdapterPosition()).label.toString());
+                                            apps.remove(getAdapterPosition());
+                                            notifyDataSetChanged();
                                         }
                                     })
                                     .create();

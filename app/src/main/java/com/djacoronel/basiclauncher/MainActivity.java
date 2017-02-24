@@ -76,6 +76,8 @@ public class MainActivity extends Activity {
 
     private void loadApps() {
         PackageManager manager = getPackageManager();
+        DbHelper dbHelper = new DbHelper(this);
+        ArrayList<String> hidden = dbHelper.getHiddenList();
         apps = new ArrayList<>();
 
         Intent i = new Intent(Intent.ACTION_MAIN, null);
@@ -88,7 +90,8 @@ public class MainActivity extends Activity {
             app.label = ri.loadLabel(manager);
             app.name = ri.activityInfo.packageName;
             app.icon = ri.activityInfo.loadIcon(manager);
-            apps.add(app);
+            if(!hidden.contains(app.label))
+                apps.add(app);
         }
 
         Collections.sort(apps, new Comparator<AppDetail>() {
