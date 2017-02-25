@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
+class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     private PackageManager manager;
     private List<MainActivity.AppDetail> apps;
     private Context mContext;
@@ -64,30 +64,36 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                     new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
-                            AlertDialog dialog = new AlertDialog.Builder(mContext)
-                                    .setTitle("Options")
-                                    .setMessage("Uninstall or hide the app?")
-                                    .setCancelable(true)
-                                    .setPositiveButton("Uninstall", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Uri packageUri = Uri.parse("package:" + apps.get(getAdapterPosition()).name.toString());
-                                            Intent uninstallIntent =
-                                                    new Intent(Intent.ACTION_DELETE, packageUri);
-                                            mContext.startActivity(uninstallIntent);
-                                        }
-                                    })
-                                    .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            DbHelper dbHelper = new DbHelper(mContext);
-                                            dbHelper.addToHidden(apps.get(getAdapterPosition()).label.toString());
-                                            apps.remove(getAdapterPosition());
-                                            notifyDataSetChanged();
-                                        }
-                                    })
-                                    .create();
-                            dialog.show();
+                            if(apps.get(getAdapterPosition()).label.toString().equals("Settings")){
+                                Intent I = new Intent(mContext,Settings.class);
+                                mContext.startActivity(I);
+                            } else {
+                                AlertDialog dialog = new AlertDialog.Builder(mContext)
+                                        .setTitle("Options")
+                                        .setMessage("Uninstall or hide the app?")
+                                        .setCancelable(true)
+                                        .setPositiveButton("Uninstall", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Uri packageUri = Uri.parse("package:" + apps.get(getAdapterPosition()).name.toString());
+                                                Intent uninstallIntent =
+                                                        new Intent(Intent.ACTION_DELETE, packageUri);
+                                                mContext.startActivity(uninstallIntent);
+                                            }
+                                        })
+                                        .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                DbHelper dbHelper = new DbHelper(mContext);
+                                                dbHelper.addToHidden(apps.get(getAdapterPosition()).label.toString());
+                                                apps.remove(getAdapterPosition());
+                                                notifyDataSetChanged();
+                                            }
+                                        })
+                                        .create();
+                                dialog.show();
+                            }
+
                             return false;
                         }
                     }
