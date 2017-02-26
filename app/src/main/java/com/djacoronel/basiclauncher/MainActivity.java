@@ -29,7 +29,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private List<AppDetail> apps;
+    ViewPager viewPager;
     View decorView;
 
     @Override
@@ -37,24 +37,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         decorView = getWindow().getDecorView();
-        loadApps();
-        loadAppGrid();
 
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadApps();
-                loadAppGrid();
-            }
-        };
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        intentFilter.addDataScheme("package");
-        registerReceiver(br, intentFilter);
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        final PagerAdapter adapter = new PagerAdapter
+                (getFragmentManager(), 3);
+        viewPager.setAdapter(adapter);
     }
 
     @Override
     public void onBackPressed() {
+        viewPager.setCurrentItem(2);
     }
 
     @Override
@@ -69,44 +61,5 @@ public class MainActivity extends Activity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 
-    public class AppDetail{
-        CharSequence label, name;
-        Drawable icon;
-    }
 
-    private void loadApps() {
-        PackageManager manager = getPackageManager();
-        DbHelper dbHelper = new DbHelper(this);
-        ArrayList<String> hidden = dbHelper.getHiddenList();
-        apps = new ArrayList<>();
-
-        Intent i = new Intent(Intent.ACTION_MAIN, null);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> availableActivities = manager.queryIntentActivities(i, 0);
-
-        for(ResolveInfo ri : availableActivities) {
-            AppDetail app = new AppDetail();
-            app.label = ri.loadLabel(manager);
-            app.name = ri.activityInfo.packageName;
-            app.icon = ri.activityInfo.loadIcon(manager);
-            if(!hidden.contains(app.label))
-                apps.add(app);
-        }
-
-        Collections.sort(apps, new Comparator<AppDetail>() {
-            @Override
-            public int compare(AppDetail a1, AppDetail a2) {
-                return a1.label.toString().compareToIgnoreCase(a2.label.toString());
-            }
-        });
-    }
-
-    public void loadAppGrid(){
-        RecyclerView grid = (RecyclerView) findViewById(R.id.app_grid);
-        GridAdapter adapter = new GridAdapter(apps, this);
-
-        grid.setLayoutManager(new GridLayoutManager(this,4));
-        grid.setAdapter(adapter);
-    }
 }
