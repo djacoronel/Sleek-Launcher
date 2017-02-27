@@ -5,6 +5,7 @@
     android:paddingTop="50dp"
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
+    android:paddingBottom="50dp"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:id="@+id/app_grid"/>

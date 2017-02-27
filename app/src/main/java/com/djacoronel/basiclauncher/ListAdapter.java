@@ -47,62 +47,61 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     @Override
     public ListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_layout, parent, false);
+                .inflate(R.layout.item_layout, parent, false);
 
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(final ListAdapter.ViewHolder holder, int position) {
-        Task task = tasks.get(position);
+        final Task task = tasks.get(position);
 
-        if(task.getItemType().equals("normal")) {
+        if (task.getItemType().equals("normal")) {
             holder.cName.setText(task.getName());
             holder.cDuration.setText(task.getDuration());
             holder.eName.setText(task.getName());
             holder.eDuration.setText(task.getDuration());
 
-            holder.itemView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (holder.collapsed.getVisibility() != View.GONE) {
-                                holder.collapsed.setVisibility(View.GONE);
-                                holder.expanded.setVisibility(View.VISIBLE);
-                            } else {
-                                holder.collapsed.setVisibility(View.VISIBLE);
-                                holder.expanded.setVisibility(View.GONE);
-                            }
-                        }
-                    }
-            );
+            holder.collapsed.setVisibility(View.VISIBLE);
+            holder.expanded.setVisibility(View.GONE);
+        } else if (task.getItemType().equals("expanded")) {
+            holder.cName.setText(task.getName());
+            holder.cDuration.setText(task.getDuration());
+            holder.eName.setText(task.getName());
+            holder.eDuration.setText(task.getDuration());
+
+            holder.collapsed.setVisibility(View.GONE);
+            holder.expanded.setVisibility(View.VISIBLE);
+        } else {
+            holder.cName.setText("Task Name");
+            holder.cDuration.setText("00:00");
+            holder.eName.setText("");
+            holder.eDuration.setText("");
 
             holder.collapsed.setVisibility(View.VISIBLE);
             holder.expanded.setVisibility(View.GONE);
+        }
 
-        } else if(task.getItemType().equals("input")){
-            holder.cName.setText("Task Name");
-            holder.cDuration.setText("Duration");
-            holder.eName.setText("Task Name");
-            holder.eDuration.setText("Duration");
-
-            holder.itemView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            tasks.remove(tasks.size()-1);
+        holder.itemView.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (task.getItemType().equals("normal")) {
+                            holder.collapsed.setVisibility(View.GONE);
+                            holder.expanded.setVisibility(View.VISIBLE);
+                            task.setItemType("expanded");
+                        } else if (task.getItemType().equals("expanded")) {
+                            holder.collapsed.setVisibility(View.VISIBLE);
+                            holder.expanded.setVisibility(View.GONE);
+                            task.setItemType("normal");
+                        } else {
+                            tasks.remove(tasks.size() - 1);
                             notifyItemRemoved(tasks.size());
                             listener.addTask();
                         }
                     }
-            );
-
-            holder.collapsed.setVisibility(View.VISIBLE);
-            holder.expanded.setVisibility(View.GONE);
-        } else {
-            holder.collapsed.setVisibility(View.GONE);
-            holder.expanded.setVisibility(View.VISIBLE);
-        }
+                }
+        );
     }
 
     MethodCaller listener;
