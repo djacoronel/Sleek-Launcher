@@ -7,14 +7,19 @@ public class TasksTouchHelper extends ItemTouchHelper.SimpleCallback {
     private ListAdapter listAdapter;
 
     public TasksTouchHelper(ListAdapter listAdapter){
-        super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT);
         this.listAdapter = listAdapter;
     }
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        listAdapter.swap(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-        return true;
+        if(viewHolder.getAdapterPosition()!=listAdapter.tasks.size()-1
+                && target.getAdapterPosition()!=listAdapter.tasks.size()-1){
+            listAdapter.swap(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

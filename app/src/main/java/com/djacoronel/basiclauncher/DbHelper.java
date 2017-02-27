@@ -75,7 +75,7 @@ class DbHelper extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TDURATION)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TSTATUS)),
                         context);
-                task.setId(cursor.getColumnIndex(ID));
+                task.setId(cursor.getLong(cursor.getColumnIndex(ID)));
                 tasks.add(task);
                 cursor.moveToNext();
             }

@@ -1,6 +1,7 @@
 package com.djacoronel.basiclauncher;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -59,6 +60,9 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.eName.setText(task.getName());
             holder.eDuration.setText(task.getDuration());
 
+            holder.cName.setTextColor(Color.BLACK);
+            holder.cDuration.setTextColor(Color.BLACK);
+
             holder.collapsed.setVisibility(View.VISIBLE);
             holder.expanded.setVisibility(View.GONE);
         } else if (task.getItemType().equals("expanded")) {
@@ -67,13 +71,19 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.eName.setText(task.getName());
             holder.eDuration.setText(task.getDuration());
 
+            holder.cName.setTextColor(Color.BLACK);
+            holder.cDuration.setTextColor(Color.BLACK);
+
             holder.collapsed.setVisibility(View.GONE);
             holder.expanded.setVisibility(View.VISIBLE);
         } else {
             holder.cName.setText("Task Name");
-            holder.cDuration.setText("00:00");
+            holder.cDuration.setText("Duration");
             holder.eName.setText("");
             holder.eDuration.setText("");
+
+            holder.cName.setTextColor(Color.LTGRAY);
+            holder.cDuration.setTextColor(Color.LTGRAY);
 
             holder.collapsed.setVisibility(View.VISIBLE);
             holder.expanded.setVisibility(View.GONE);

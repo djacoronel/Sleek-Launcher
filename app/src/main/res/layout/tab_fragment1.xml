@@ -12,8 +12,8 @@
         android:clipToPadding="false"
         android:paddingTop="50dp"
         android:paddingBottom="300dp"
-        android:paddingStart="30dp"
-        android:paddingEnd="30dp"/>
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
 
     <View
         android:layout_width="match_parent"
