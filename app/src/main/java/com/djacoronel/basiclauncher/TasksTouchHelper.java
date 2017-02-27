@@ -3,10 +3,10 @@ package com.djacoronel.basiclauncher;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-public class TasksTouchHelper extends ItemTouchHelper.SimpleCallback {
+class TasksTouchHelper extends ItemTouchHelper.SimpleCallback {
     private ListAdapter listAdapter;
 
-    public TasksTouchHelper(ListAdapter listAdapter){
+    TasksTouchHelper(ListAdapter listAdapter) {
         super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT);
         this.listAdapter = listAdapter;
     }
