@@ -2,6 +2,8 @@ package com.djacoronel.basiclauncher;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
@@ -51,14 +54,13 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final ListAdapter.ViewHolder holder, final int position) {
         final Task task = tasks.get(position);
 
         if (task.getItemType().equals("normal")) {
             holder.cName.setText(task.getName());
             holder.cDuration.setText(task.getDuration());
             holder.eName.setText(task.getName());
-            holder.eDuration.setText(task.getDuration());
 
             holder.cName.setTextColor(Color.BLACK);
             holder.cDuration.setTextColor(Color.BLACK);
@@ -69,7 +71,6 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.cName.setText(task.getName());
             holder.cDuration.setText(task.getDuration());
             holder.eName.setText(task.getName());
-            holder.eDuration.setText(task.getDuration());
 
             holder.cName.setTextColor(Color.BLACK);
             holder.cDuration.setTextColor(Color.BLACK);
@@ -89,6 +90,8 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.expanded.setVisibility(View.GONE);
         }
 
+        final CountDownTimer[] timer = new CountDownTimer[1];
+
         holder.itemView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -96,16 +99,65 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                         if (task.getItemType().equals("normal")) {
                             holder.collapsed.setVisibility(View.GONE);
                             holder.expanded.setVisibility(View.VISIBLE);
+                            final String FORMAT = "%02d:%02d:%02d";
+
+
+                            timer[0] = new CountDownTimer(task.getDurationValue(), 1000) { // adjust the milli seconds here
+
+                                public void onTick(long millisUntilFinished) {
+
+                                    String duration = "" + String.format(FORMAT,
+                                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
+                                                    TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                                    TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
+
+                                    holder.eDuration.setText(duration);
+                                }
+
+                                public void onFinish() {
+                                    holder.eDuration.setText("Done!");
+                                    final Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            tasks.remove(position).deleteFromDb();
+                                            notifyItemRemoved(position);
+                                        }
+                                    }, 2000);
+                                }
+                            }.start();
+
                             task.setItemType("expanded");
                         } else if (task.getItemType().equals("expanded")) {
                             holder.collapsed.setVisibility(View.VISIBLE);
                             holder.expanded.setVisibility(View.GONE);
                             task.setItemType("normal");
+                            timer[0].cancel();
                         } else {
                             tasks.remove(tasks.size() - 1);
                             notifyItemRemoved(tasks.size());
                             listener.addTask();
                         }
+                    }
+                }
+        );
+        holder.itemView.setOnLongClickListener(
+                new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        timer[0].cancel();
+                        holder.eDuration.setText("Done!");
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                tasks.remove(position).deleteFromDb();
+                                notifyItemRemoved(position);
+                            }
+                        }, 2000);
+                        return true;
                     }
                 }
         );
@@ -127,7 +179,7 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         notifyItemRemoved(position);
     }
 
-    public void swap(int firstPosition, int secondPosition){
+    public void swap(int firstPosition, int secondPosition) {
         Task task1 = tasks.get(firstPosition);
         Task task2 = tasks.get(secondPosition);
 

@@ -7,27 +7,39 @@ class Task {
     private long id;
     private DbHelper dbHelper;
 
-    Task(String itemType){
+    Task(String itemType) {
         this.itemType = itemType;
     }
 
-    Task(String name, String duration, String status, Context context){
+    Task(String name, String duration, String status, Context context) {
         this.name = name;
         this.duration = duration;
         this.status = status;
         dbHelper = new DbHelper(context);
     }
 
-    public void addToDb(){
+    public void addToDb() {
         this.id = dbHelper.addTask(this);
     }
 
-    public void updateDb(){
+    public void updateDb() {
         dbHelper.updateTask(this);
     }
 
-    public void deleteFromDb(){
+    public void deleteFromDb() {
         dbHelper.deleteTask(id);
+    }
+
+    public long getDurationValue() {
+        String split[] = duration.split(" ");
+
+        if (split.length == 2 && split[1].contains("minutes"))
+            return Integer.parseInt(split[0]) * 60000;
+        else if (split.length == 2 && split[1].contains("hour"))
+            return Integer.parseInt(split[0]) * 3600000;
+        else
+            return Integer.parseInt(split[0]) * 3600000 + Integer.parseInt(split[2]) * 60000;
+
     }
 
     public long getId() {

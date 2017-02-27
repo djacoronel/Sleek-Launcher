@@ -62,7 +62,7 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
     }
 
 
-    String duration, m = "5 minutes", h = "0 hours";
+    String duration, m = "0 minutes", h = "0 hours";
 
     @Override
     public void addTask() {
@@ -75,7 +75,7 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
         FloatingActionButton button = (FloatingActionButton) mView.findViewById(R.id.input_button);
 
         final String hours[] = {"0 hours", "1 hour", "2 hours", "3 hours", "4 hours", "5 hours"};
-        final String mins[] = {"5 minutes", "10 minutes", "15 minutes",
+        final String mins[] = {"0 minutes", "5 minutes", "10 minutes", "15 minutes",
                 "20 minutes", "25 minutes", "30 minutes", "35 minutes",
                 "40 minutes", "45 minutes", "50 minutes", "55 minutes"};
 
@@ -128,19 +128,20 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
                         tasks.add(new Task("input"));
                         adapter.notifyItemInserted(tasks.size());
 
-                        m = "5 minutes";
+                        m = "0 minutes";
                         h = "0 hours";
                     }
                 }
         );
 
-
         button.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (h.equals("0 hours"))
+                        if (h.equals("0 hours") && !m.equals("0 minutes"))
                             duration = m;
+                        else if (!h.equals("0 hours") && m.equals("0 minutes"))
+                            duration = h;
                         else
                             duration = h + " " + m;
 
