@@ -1,11 +1,6 @@
 package com.djacoronel.basiclauncher;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,10 +9,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
-    private ArrayList<Task> tasks;
+    ArrayList<Task> tasks;
     private Context mContext;
 
     ListAdapter(ArrayList<Task> tasks, MethodCaller listener, Context context) {
@@ -41,6 +37,7 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
             collapsed = (ConstraintLayout) itemView.findViewById(R.id.collapsed_item);
             expanded = (ConstraintLayout) itemView.findViewById(R.id.expanded_item);
+
         }
     }
 
@@ -114,4 +111,27 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public int getItemCount() {
         return tasks.size();
     }
+
+    public void remove(int position) {
+        tasks.remove(position).deleteFromDb();
+        notifyItemRemoved(position);
+    }
+
+    public void swap(int firstPosition, int secondPosition){
+        Task task1 = tasks.get(firstPosition);
+        Task task2 = tasks.get(secondPosition);
+
+        long id1 = task1.getId();
+        long id2 = task2.getId();
+
+        task1.setId(id2);
+        task2.setId(id1);
+
+        task1.updateDb();
+        task2.updateDb();
+
+        Collections.swap(tasks, firstPosition, secondPosition);
+        notifyItemMoved(firstPosition, secondPosition);
+    }
+
 }

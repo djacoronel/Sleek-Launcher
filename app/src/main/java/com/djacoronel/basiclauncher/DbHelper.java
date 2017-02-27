@@ -19,7 +19,7 @@ class DbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" +
-                    ID + " INTEGER PRIMARY KEY," +
+                    ID + " INTEGER PRIMARY KEY autoincrement," +
                     COLUMN_NAME_LABEL + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -33,7 +33,7 @@ class DbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_TASKS =
             "CREATE TABLE " + TABLE_NAME_TASKS + " (" +
-                    ID_TASKS + " INTEGER PRIMARY KEY," +
+                    ID_TASKS + " INTEGER PRIMARY KEY autoincrement," +
                     COLUMN_NAME_TNAME + " TEXT," +
                     COLUMN_NAME_TDURATION + " TEXT," +
                     COLUMN_NAME_TSTATUS + " TEXT)";
@@ -71,10 +71,12 @@ class DbHelper extends SQLiteOpenHelper {
         ArrayList<Task> tasks = new ArrayList<>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
-                tasks.add(new Task(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TNAME)),
-                                cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TDURATION)),
-                                cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TSTATUS)),
-                                context));
+                Task task = new Task(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TNAME)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TDURATION)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TSTATUS)),
+                        context);
+                task.setId(cursor.getColumnIndex(ID));
+                tasks.add(task);
                 cursor.moveToNext();
             }
         }

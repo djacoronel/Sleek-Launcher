@@ -26,7 +26,7 @@ class Task {
         dbHelper.updateTask(this);
     }
 
-    public void deletefromDb(){
+    public void deleteFromDb(){
         dbHelper.deleteTask(id);
     }
 

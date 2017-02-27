@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,10 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller{
 
         list.setLayoutManager(new LinearLayoutManager(mContext));
         list.setAdapter(adapter);
+
+        ItemTouchHelper.Callback callback = new TasksTouchHelper(adapter);
+        ItemTouchHelper helper = new ItemTouchHelper(callback);
+        helper.attachToRecyclerView(list);
     }
 
     @Override
