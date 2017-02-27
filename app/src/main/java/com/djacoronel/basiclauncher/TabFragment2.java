@@ -35,7 +35,7 @@ public class TabFragment2 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_fragment2, container, false);
-        mContext  = getActivity().getApplicationContext();
+        mContext  = getActivity();
 
         grid = (RecyclerView) rootView.findViewById(R.id.app_grid);
 
@@ -62,6 +62,8 @@ public class TabFragment2 extends Fragment {
         Drawable icon;
     }
 
+
+
     private void loadApps() {
         PackageManager manager = mContext.getPackageManager();
         DbHelper dbHelper = new DbHelper(mContext);
@@ -78,7 +80,7 @@ public class TabFragment2 extends Fragment {
             app.label = ri.loadLabel(manager);
             app.name = ri.activityInfo.packageName;
             app.icon = ri.activityInfo.loadIcon(manager);
-            if(!hidden.contains(app.label))
+            if(!hidden.contains(app.label.toString()))
                 apps.add(app);
         }
 

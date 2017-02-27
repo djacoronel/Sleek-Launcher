@@ -4,9 +4,6 @@
     android:background="@android:color/background_dark"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
     tools:context="com.djacoronel.basiclauncher.MainActivity">
 
     <include
@@ -17,4 +14,10 @@
         android:layout_height="50dp"
         android:layout_gravity="bottom"
         android:background="@drawable/bottom_gradient" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="top"
+        android:background="@drawable/top_gradient"/>
 </FrameLayout>
