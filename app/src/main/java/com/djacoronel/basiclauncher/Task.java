@@ -4,7 +4,7 @@ import android.content.Context;
 
 class Task {
     private String name, duration, status, itemType = "normal";
-    private long id;
+    private long id, timeRemaining;
     private DbHelper dbHelper;
 
     Task(String itemType) {
@@ -15,6 +15,7 @@ class Task {
         this.name = name;
         this.duration = duration;
         this.status = status;
+        timeRemaining = getDurationValue();
         dbHelper = new DbHelper(context);
     }
 
@@ -40,6 +41,14 @@ class Task {
         else
             return Integer.parseInt(split[0]) * 3600000 + Integer.parseInt(split[2]) * 60000;
 
+    }
+
+    public void setTimeRemaining(long timeRemaining) {
+        this.timeRemaining = timeRemaining;
+    }
+
+    public long getTimeRemaining() {
+        return timeRemaining;
     }
 
     public long getId() {

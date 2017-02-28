@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,6 +44,60 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             expanded = (ConstraintLayout) itemView.findViewById(R.id.expanded_item);
 
         }
+
+        private CountDownTimer timer;
+        private long timeRemaining;
+
+        private void startTimer(Task task) {
+
+            final String HFORMAT = "%2d:%02d:%02d";
+            final String MFORMAT = "%2d:%02d";
+
+            if (timer != null)
+                timer.cancel();
+            timer = new CountDownTimer(task.getTimeRemaining(), 1000) {
+
+                public void onTick(long millisUntilFinished) {
+
+                    String duration;
+                    if (TimeUnit.MILLISECONDS.toHours(millisUntilFinished) != 0) {
+                        duration = "" + String.format(HFORMAT,
+                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
+                                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
+                    } else {
+                        duration = "" + String.format(MFORMAT,
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
+                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
+                    }
+                    timeRemaining = millisUntilFinished;
+                    eDuration.setText(duration);
+                }
+
+                public void onFinish() {
+                    eDuration.setText("Done!");
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            tasks.remove(getAdapterPosition()).deleteFromDb();
+                            notifyItemRemoved(getAdapterPosition());
+                        }
+                    }, 2000);
+                }
+            }.start();
+        }
+
+        private void stopTimer(Task task) {
+            if (timer != null)
+                timer.cancel();
+
+            task.setTimeRemaining(timeRemaining);
+            task.updateDb();
+        }
     }
 
     @Override
@@ -54,116 +109,112 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ListAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ListAdapter.ViewHolder holder, int position) {
         final Task task = tasks.get(position);
 
-        if (task.getItemType().equals("normal")) {
-            holder.cName.setText(task.getName());
-            holder.cDuration.setText(task.getDuration());
-            holder.eName.setText(task.getName());
-
-            holder.cName.setTextColor(Color.BLACK);
-            holder.cDuration.setTextColor(Color.BLACK);
-
-            holder.collapsed.setVisibility(View.VISIBLE);
-            holder.expanded.setVisibility(View.GONE);
-        } else if (task.getItemType().equals("expanded")) {
-            holder.cName.setText(task.getName());
-            holder.cDuration.setText(task.getDuration());
-            holder.eName.setText(task.getName());
-
-            holder.cName.setTextColor(Color.BLACK);
-            holder.cDuration.setTextColor(Color.BLACK);
-
-            holder.collapsed.setVisibility(View.GONE);
-            holder.expanded.setVisibility(View.VISIBLE);
-        } else {
-            holder.cName.setText("Task Name");
-            holder.cDuration.setText("Duration");
-            holder.eName.setText("");
-            holder.eDuration.setText("");
-
-            holder.cName.setTextColor(Color.LTGRAY);
-            holder.cDuration.setTextColor(Color.LTGRAY);
-
-            holder.collapsed.setVisibility(View.VISIBLE);
-            holder.expanded.setVisibility(View.GONE);
+        switch (task.getItemType()) {
+            case "normal":
+                setCollapsed(holder, task);
+                break;
+            case "expanded":
+                setExpanded(holder, task);
+                break;
+            default:
+                setInput(holder, task);
+                break;
         }
-
-        final CountDownTimer[] timer = new CountDownTimer[1];
 
         holder.itemView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (task.getItemType().equals("normal")) {
-                            holder.collapsed.setVisibility(View.GONE);
-                            holder.expanded.setVisibility(View.VISIBLE);
-                            final String FORMAT = "%02d:%02d:%02d";
-
-
-                            timer[0] = new CountDownTimer(task.getDurationValue(), 1000) { // adjust the milli seconds here
-
-                                public void onTick(long millisUntilFinished) {
-
-                                    String duration = "" + String.format(FORMAT,
-                                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
-                                                    TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                                    TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
-
-                                    holder.eDuration.setText(duration);
-                                }
-
-                                public void onFinish() {
-                                    holder.eDuration.setText("Done!");
-                                    final Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            tasks.remove(position).deleteFromDb();
-                                            notifyItemRemoved(position);
-                                        }
-                                    }, 2000);
-                                }
-                            }.start();
-
-                            task.setItemType("expanded");
-                        } else if (task.getItemType().equals("expanded")) {
-                            holder.collapsed.setVisibility(View.VISIBLE);
-                            holder.expanded.setVisibility(View.GONE);
-                            task.setItemType("normal");
-                            timer[0].cancel();
-                        } else {
-                            tasks.remove(tasks.size() - 1);
-                            notifyItemRemoved(tasks.size());
-                            listener.addTask();
+                        switch (task.getItemType()) {
+                            case "normal":
+                                holder.collapsed.setVisibility(View.GONE);
+                                holder.expanded.setVisibility(View.VISIBLE);
+                                task.setItemType("expanded");
+                                holder.startTimer(task);
+                                break;
+                            case "expanded":
+                                holder.collapsed.setVisibility(View.VISIBLE);
+                                holder.expanded.setVisibility(View.GONE);
+                                task.setItemType("normal");
+                                holder.stopTimer(task);
+                                break;
+                            default:
+                                tasks.remove(tasks.size() - 1);
+                                notifyItemRemoved(tasks.size());
+                                listener.addTask();
+                                break;
                         }
                     }
                 }
         );
+
+
         holder.itemView.setOnLongClickListener(
                 new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        timer[0].cancel();
-                        holder.eDuration.setText("Done!");
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                tasks.remove(position).deleteFromDb();
-                                notifyItemRemoved(position);
-                            }
-                        }, 2000);
+                        if (task.getItemType().equals("expanded")) {
+                            Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                            vibrator.vibrate(100);
+                            holder.stopTimer(task);
+                            holder.eDuration.setText("Done!");
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tasks.remove(holder.getAdapterPosition()).deleteFromDb();
+                                    notifyItemRemoved(holder.getAdapterPosition());
+                                }
+                            }, 2000);
+                        }
                         return true;
                     }
                 }
         );
+
     }
 
-    MethodCaller listener;
+    private void setCollapsed(ViewHolder holder, Task task) {
+        holder.cName.setText(task.getName());
+        holder.cDuration.setText(task.getDuration());
+        holder.eName.setText(task.getName());
+
+        holder.cName.setTextColor(Color.BLACK);
+        holder.cDuration.setTextColor(Color.BLACK);
+
+        holder.collapsed.setVisibility(View.VISIBLE);
+        holder.expanded.setVisibility(View.GONE);
+    }
+
+    private void setExpanded(ViewHolder holder, Task task) {
+        holder.cName.setText(task.getName());
+        holder.cDuration.setText(task.getDuration());
+        holder.eName.setText(task.getName());
+
+        holder.cName.setTextColor(Color.BLACK);
+        holder.cDuration.setTextColor(Color.BLACK);
+
+        holder.collapsed.setVisibility(View.GONE);
+        holder.expanded.setVisibility(View.VISIBLE);
+    }
+
+    private void setInput(ViewHolder holder, Task task) {
+        holder.cName.setText("Task Name");
+        holder.cDuration.setText("Duration");
+        holder.eName.setText("");
+        holder.eDuration.setText("");
+
+        holder.cName.setTextColor(Color.LTGRAY);
+        holder.cDuration.setTextColor(Color.LTGRAY);
+
+        holder.collapsed.setVisibility(View.VISIBLE);
+        holder.expanded.setVisibility(View.GONE);
+    }
+
+    private MethodCaller listener;
 
     interface MethodCaller {
         void addTask();
@@ -174,14 +225,24 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return tasks.size();
     }
 
-    public void remove(int position) {
+    void remove(int position) {
         tasks.remove(position).deleteFromDb();
         notifyItemRemoved(position);
     }
 
-    public void swap(int firstPosition, int secondPosition) {
+    void swap(int firstPosition, int secondPosition, ViewHolder holder) {
+
         Task task1 = tasks.get(firstPosition);
         Task task2 = tasks.get(secondPosition);
+
+        boolean task1IsExpanded = task1.getItemType().equals("expanded");
+        boolean task2IsExpanded = task2.getItemType().equals("expanded");
+
+        if (task1IsExpanded)
+            holder.stopTimer(task1);
+
+        if (task2IsExpanded)
+            holder.stopTimer(task2);
 
         long id1 = task1.getId();
         long id2 = task2.getId();
@@ -194,6 +255,11 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         Collections.swap(tasks, firstPosition, secondPosition);
         notifyItemMoved(firstPosition, secondPosition);
+
+        if (task1IsExpanded)
+            holder.startTimer(task2);
+        if (task2IsExpanded)
+            holder.startTimer(task1);
     }
 
 }

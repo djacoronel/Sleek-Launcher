@@ -15,7 +15,7 @@ class TasksTouchHelper extends ItemTouchHelper.SimpleCallback {
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
         if(viewHolder.getAdapterPosition()!=listAdapter.tasks.size()-1
                 && target.getAdapterPosition()!=listAdapter.tasks.size()-1){
-            listAdapter.swap(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+            listAdapter.swap(viewHolder.getAdapterPosition(), target.getAdapterPosition(), (ListAdapter.ViewHolder) viewHolder);
             return true;
         } else {
             return false;
