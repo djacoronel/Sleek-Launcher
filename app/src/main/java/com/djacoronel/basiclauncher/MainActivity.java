@@ -1,25 +1,44 @@
 package com.djacoronel.basiclauncher;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
-public class MainActivity extends Activity {
+import org.malcdevelop.cyclicview.CyclicFragmentAdapter;
+import org.malcdevelop.cyclicview.CyclicView;
 
-    ViewPager viewPager;
+public class MainActivity extends AppCompatActivity {
+
+    CyclicView viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        viewPager = (ViewPager) findViewById(R.id.pager);
-        final PagerAdapter adapter = new PagerAdapter
-                (getFragmentManager(), 3);
-        viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(1);
-        viewPager.setOffscreenPageLimit(2);
+        viewPager = (CyclicView) findViewById(R.id.pager);
+        viewPager.setAdapter(
+                new CyclicFragmentAdapter(this, getSupportFragmentManager()) {
+                    @Override
+                    protected Fragment createFragment(int i) {
+                        if (i == 0)
+                            return new TabFragment1();
+                        else if (i == 1)
+                            return new TabFragment2();
+                        else
+                            return new TabFragment3();
+
+                    }
+
+                    @Override
+                    public int getItemsCount() {
+                        return 3;
+                    }
+                }
+        );
+        viewPager.setCurrentPosition(1);
+
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
@@ -27,6 +46,6 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        viewPager.setCurrentItem(1);
+        viewPager.setCurrentPosition(1);
     }
 }

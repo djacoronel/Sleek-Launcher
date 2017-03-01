@@ -19,19 +19,19 @@ class Task {
         dbHelper = new DbHelper(context);
     }
 
-    public void addToDb() {
+    void addToDb() {
         this.id = dbHelper.addTask(this);
     }
 
-    public void updateDb() {
+    void updateDb() {
         dbHelper.updateTask(this);
     }
 
-    public void deleteFromDb() {
+    void deleteFromDb() {
         dbHelper.deleteTask(id);
     }
 
-    public long getDurationValue() {
+    private long getDurationValue() {
         String split[] = duration.split(" ");
 
         if (split.length == 2 && split[1].contains("minutes"))
@@ -43,51 +43,51 @@ class Task {
 
     }
 
-    public void setTimeRemaining(long timeRemaining) {
+    void setTimeRemaining(long timeRemaining) {
         this.timeRemaining = timeRemaining;
     }
 
-    public long getTimeRemaining() {
+    long getTimeRemaining() {
         return timeRemaining;
     }
 
-    public long getId() {
+    long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    void setId(long id) {
         this.id = id;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public String getDuration() {
+    String getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    void setDuration(String duration) {
         this.duration = duration;
     }
 
-    public String getStatus() {
+    String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    void setStatus(String status) {
         this.status = status;
     }
 
-    public String getItemType() {
+    String getItemType() {
         return itemType;
     }
 
-    public void setItemType(String itemType) {
+    void setItemType(String itemType) {
         this.itemType = itemType;
     }
 }
