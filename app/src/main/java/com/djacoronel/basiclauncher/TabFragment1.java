@@ -8,7 +8,9 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +18,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 
@@ -69,6 +71,8 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
         LayoutInflater layoutInflaterAndroid = LayoutInflater.from(mContext);
         final View mView = layoutInflaterAndroid.inflate(R.layout.input_layout, null);
 
+        final ConstraintLayout inputLayout = (ConstraintLayout) mView.findViewById(R.id.input_item);
+        final ConstraintLayout collapsedLayout = (ConstraintLayout) mView.findViewById(R.id.collapsed_input);
         final EditText name = (EditText) mView.findViewById(R.id.itemNameIn);
         final NumberPicker hour = (NumberPicker) mView.findViewById(R.id.hourPicker);
         final NumberPicker min = (NumberPicker) mView.findViewById(R.id.minutePicker);
@@ -116,11 +120,6 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
                 .setCancelable(true)
                 .create();
 
-        addTaskDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        addTaskDialog.show();
-        addTaskDialog.getWindow().setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
         addTaskDialog.setOnDismissListener(
                 new DialogInterface.OnDismissListener() {
                     @Override
@@ -130,6 +129,9 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
 
                         m = "0 minutes";
                         h = "0 hours";
+
+                        collapsedLayout.setVisibility(View.VISIBLE);
+                        inputLayout.setVisibility(View.GONE);
                     }
                 }
         );
@@ -159,6 +161,22 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
                     }
                 });
 
+        addTaskDialog.show();
+        addTaskDialog.getWindow().setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        final Handler handler = new Handler();
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                collapsedLayout.setVisibility(View.GONE);
+                inputLayout.setVisibility(View.VISIBLE);
+                name.requestFocus();
+                final InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(name, InputMethodManager.SHOW_IMPLICIT);
+            }
+        }, 200);
     }
 
     private void setDividerColor(NumberPicker picker, int color) {

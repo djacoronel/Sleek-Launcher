@@ -78,15 +78,7 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 }
 
                 public void onFinish() {
-                    eDuration.setText("Done!");
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            tasks.remove(getAdapterPosition()).deleteFromDb();
-                            notifyItemRemoved(getAdapterPosition());
-                        }
-                    }, 2000);
+                    eDuration.setText("Times Up!");
                 }
             }.start();
         }
