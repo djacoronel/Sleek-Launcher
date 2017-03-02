@@ -46,7 +46,9 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
 
         private CountDownTimer timer;
+        private CountUpTimer upTimer;
         private long timeRemaining;
+        Boolean isOverTime = false;
 
         private void startTimer(Task task) {
 
@@ -78,7 +80,29 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 }
 
                 public void onFinish() {
-                    eDuration.setText("Times Up!");
+                    isOverTime = true;
+                    upTimer = new CountUpTimer(1000) {
+                        @Override
+                        public void onTick(long elapsedTime) {
+                            String overTime;
+                            if (TimeUnit.MILLISECONDS.toHours(elapsedTime) != 0) {
+                                overTime = "" + String.format(HFORMAT,
+                                        TimeUnit.MILLISECONDS.toHours(elapsedTime),
+                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime) - TimeUnit.HOURS.toMinutes(
+                                                TimeUnit.MILLISECONDS.toHours(elapsedTime)),
+                                        TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
+                                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
+                            } else {
+                                overTime = "" + String.format(MFORMAT,
+                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime),
+                                        TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
+                                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
+                            }
+                            timeRemaining = elapsedTime;
+                            eDuration.setText(overTime);
+                        }
+                    };
+                    upTimer.start();
                 }
             }.start();
         }
@@ -86,6 +110,9 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         private void stopTimer(Task task) {
             if (timer != null)
                 timer.cancel();
+
+            if (upTimer != null)
+                upTimer.stop();
 
             task.setTimeRemaining(timeRemaining);
             task.updateDb();
@@ -128,10 +155,12 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                                 holder.startTimer(task);
                                 break;
                             case "expanded":
-                                holder.collapsed.setVisibility(View.VISIBLE);
-                                holder.expanded.setVisibility(View.GONE);
-                                task.setItemType("normal");
-                                holder.stopTimer(task);
+                                if (!holder.isOverTime) {
+                                    holder.collapsed.setVisibility(View.VISIBLE);
+                                    holder.expanded.setVisibility(View.GONE);
+                                    task.setItemType("normal");
+                                    holder.stopTimer(task);
+                                }
                                 break;
                             default:
                                 tasks.remove(tasks.size() - 1);
