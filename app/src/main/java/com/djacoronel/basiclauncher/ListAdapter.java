@@ -48,19 +48,23 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         private CountDownTimer timer;
         private CountUpTimer upTimer;
         private long timeRemaining;
-        Boolean isOverTime = false;
 
-        private void startTimer(Task task) {
+        private void startTimer(final Task task) {
+            if (task.getStatus().equals("pending")) {
+                countDown(task);
+            } else {
+                countUp(task);
+            }
+        }
 
+        private void countDown(final Task task) {
             final String HFORMAT = "%2d:%02d:%02d";
             final String MFORMAT = "%2d:%02d";
 
             if (timer != null)
                 timer.cancel();
             timer = new CountDownTimer(task.getTimeRemaining(), 1000) {
-
                 public void onTick(long millisUntilFinished) {
-
                     String duration;
                     if (TimeUnit.MILLISECONDS.toHours(millisUntilFinished) != 0) {
                         duration = "" + String.format(HFORMAT,
@@ -77,45 +81,57 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                     }
                     timeRemaining = millisUntilFinished;
                     eDuration.setText(duration);
+                    task.setTimeRemaining(millisUntilFinished);
+                    task.updateDb();
                 }
 
                 public void onFinish() {
-                    isOverTime = true;
-                    upTimer = new CountUpTimer(1000) {
-                        @Override
-                        public void onTick(long elapsedTime) {
-                            String overTime;
-                            if (TimeUnit.MILLISECONDS.toHours(elapsedTime) != 0) {
-                                overTime = "" + String.format(HFORMAT,
-                                        TimeUnit.MILLISECONDS.toHours(elapsedTime),
-                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime) - TimeUnit.HOURS.toMinutes(
-                                                TimeUnit.MILLISECONDS.toHours(elapsedTime)),
-                                        TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
-                                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
-                            } else {
-                                overTime = "" + String.format(MFORMAT,
-                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime),
-                                        TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
-                                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
-                            }
-                            timeRemaining = elapsedTime;
-                            eDuration.setText(overTime);
-                        }
-                    };
-                    upTimer.start();
+                    task.setStatus("overtime");
+                    countUp(task);
                 }
             }.start();
         }
 
-        private void stopTimer(Task task) {
-            if (timer != null)
-                timer.cancel();
+        private void countUp(final Task task) {
+            final String HFORMAT = "%2d:%02d:%02d";
+            final String MFORMAT = "%2d:%02d";
+            final long startTime = task.getTimeRemaining();
 
             if (upTimer != null)
                 upTimer.stop();
+            upTimer = new CountUpTimer(1000) {
+                @Override
+                public void onTick(long elapsedTime) {
+                    elapsedTime += startTime;
 
-            task.setTimeRemaining(timeRemaining);
-            task.updateDb();
+                    String overTime;
+                    if (TimeUnit.MILLISECONDS.toHours(elapsedTime) != 0) {
+                        overTime = "" + String.format(HFORMAT,
+                                TimeUnit.MILLISECONDS.toHours(elapsedTime),
+                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime) - TimeUnit.HOURS.toMinutes(
+                                        TimeUnit.MILLISECONDS.toHours(elapsedTime)),
+                                TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
+                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
+                    } else {
+                        overTime = "" + String.format(MFORMAT,
+                                TimeUnit.MILLISECONDS.toMinutes(elapsedTime),
+                                TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(
+                                        TimeUnit.MILLISECONDS.toMinutes(elapsedTime)));
+                    }
+                    timeRemaining = elapsedTime;
+                    eDuration.setText(overTime);
+                    task.setTimeRemaining(timeRemaining);
+                    task.updateDb();
+                }
+            };
+            upTimer.start();
+        }
+
+        private void stopTimer() {
+            if (timer != null)
+                timer.cancel();
+            if (upTimer != null)
+                upTimer.stop();
         }
     }
 
@@ -137,6 +153,7 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 break;
             case "expanded":
                 setExpanded(holder, task);
+                holder.startTimer(task);
                 break;
             default:
                 setInput(holder, task);
@@ -152,14 +169,16 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                                 holder.collapsed.setVisibility(View.GONE);
                                 holder.expanded.setVisibility(View.VISIBLE);
                                 task.setItemType("expanded");
+                                task.updateDb();
                                 holder.startTimer(task);
                                 break;
                             case "expanded":
-                                if (!holder.isOverTime) {
+                                if (task.getStatus().equals("pending")) {
                                     holder.collapsed.setVisibility(View.VISIBLE);
                                     holder.expanded.setVisibility(View.GONE);
                                     task.setItemType("normal");
-                                    holder.stopTimer(task);
+                                    task.updateDb();
+                                    holder.stopTimer();
                                 }
                                 break;
                             default:
@@ -180,7 +199,7 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                         if (task.getItemType().equals("expanded")) {
                             Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
                             vibrator.vibrate(100);
-                            holder.stopTimer(task);
+                            holder.stopTimer();
                             holder.eDuration.setText("Done!");
                             final Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
@@ -259,11 +278,8 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         boolean task1IsExpanded = task1.getItemType().equals("expanded");
         boolean task2IsExpanded = task2.getItemType().equals("expanded");
 
-        if (task1IsExpanded)
-            holder.stopTimer(task1);
-
-        if (task2IsExpanded)
-            holder.stopTimer(task2);
+        if (task1IsExpanded || task2IsExpanded)
+            holder.stopTimer();
 
         long id1 = task1.getId();
         long id2 = task2.getId();

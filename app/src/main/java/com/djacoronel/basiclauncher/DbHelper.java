@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "basiclauncher.db";
 
     private static final String TABLE_NAME = "hiddenapps";
@@ -30,12 +30,16 @@ class DbHelper extends SQLiteOpenHelper {
     private static final String COLUMN_NAME_TNAME = "name";
     private static final String COLUMN_NAME_TDURATION = "duration";
     private static final String COLUMN_NAME_TSTATUS = "status";
+    private static final String COLUMN_NAME_TTYPE = "type";
+    private static final String COLUMN_NAME_TREMAINING = "remaining";
 
     private static final String SQL_CREATE_TASKS =
             "CREATE TABLE " + TABLE_NAME_TASKS + " (" +
                     ID_TASKS + " INTEGER PRIMARY KEY autoincrement," +
                     COLUMN_NAME_TNAME + " TEXT," +
+                    COLUMN_NAME_TTYPE + " TEXT," +
                     COLUMN_NAME_TDURATION + " TEXT," +
+                    COLUMN_NAME_TREMAINING + " TEXT," +
                     COLUMN_NAME_TSTATUS + " TEXT)";
 
     private static final String SQL_DELETE_TASKS =
@@ -72,7 +76,9 @@ class DbHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
                 Task task = new Task(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TNAME)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TTYPE)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TDURATION)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TREMAINING)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TSTATUS)),
                         context);
                 task.setId(cursor.getLong(cursor.getColumnIndex(ID)));
@@ -88,7 +94,9 @@ class DbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_TNAME, task.getName());
+        values.put(COLUMN_NAME_TTYPE, task.getItemType());
         values.put(COLUMN_NAME_TDURATION, task.getDuration());
+        values.put(COLUMN_NAME_TREMAINING, task.getTimeRemaining());
         values.put(COLUMN_NAME_TSTATUS, task.getStatus());
         return db.insert(TABLE_NAME_TASKS, null, values);
     }
@@ -98,14 +106,15 @@ class DbHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_TNAME, task.getName());
+        values.put(COLUMN_NAME_TTYPE, task.getItemType());
         values.put(COLUMN_NAME_TDURATION, task.getDuration());
+        values.put(COLUMN_NAME_TREMAINING, task.getTimeRemaining());
         values.put(COLUMN_NAME_TSTATUS, task.getStatus());
-
 
         String selection = ID+ " LIKE ?";
         String[] selectionArgs = { "" + task.getId() };
 
-        int count = db.update(
+        db.update(
                 TABLE_NAME_TASKS,
                 values,
                 selection,

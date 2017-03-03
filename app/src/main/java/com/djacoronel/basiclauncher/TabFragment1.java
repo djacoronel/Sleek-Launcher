@@ -150,7 +150,6 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
                         Task task = new Task(
                                 name.getText().toString(),
                                 duration,
-                                "pending",
                                 mContext);
 
                         task.addToDb();

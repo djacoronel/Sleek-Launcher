@@ -3,7 +3,7 @@ package com.djacoronel.basiclauncher;
 import android.content.Context;
 
 class Task {
-    private String name, duration, status, itemType = "normal";
+    private String name, duration, status = "pending", itemType = "normal";
     private long id, timeRemaining;
     private DbHelper dbHelper;
 
@@ -11,11 +11,19 @@ class Task {
         this.itemType = itemType;
     }
 
-    Task(String name, String duration, String status, Context context) {
+    Task(String name, String duration, Context context) {
         this.name = name;
         this.duration = duration;
+        this.timeRemaining = getDurationValue();
+        dbHelper = new DbHelper(context);
+    }
+
+    Task(String name, String itemType, String duration, String timeRemaining, String status, Context context) {
+        this.name = name;
+        this.itemType = itemType;
+        this.duration = duration;
+        this.timeRemaining = Long.parseLong(timeRemaining);
         this.status = status;
-        timeRemaining = getDurationValue();
         dbHelper = new DbHelper(context);
     }
 
@@ -40,7 +48,6 @@ class Task {
             return Integer.parseInt(split[0]) * 3600000;
         else
             return Integer.parseInt(split[0]) * 3600000 + Integer.parseInt(split[2]) * 60000;
-
     }
 
     void setTimeRemaining(long timeRemaining) {
