@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingTop="50dp"
-        android:paddingBottom="300dp"
+        android:paddingBottom="50dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"/>
 

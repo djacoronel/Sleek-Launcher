@@ -28,11 +28,13 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView cName, eName, cDuration, eDuration;
+        TextView cName, eName, cDuration, eDuration, overTime;
         ConstraintLayout collapsed, expanded;
 
         ViewHolder(View itemView) {
             super(itemView);
+
+            overTime = (TextView) itemView.findViewById(R.id.overTime);
 
             cName = (TextView) itemView.findViewById(R.id.itemName);
             eName = (TextView) itemView.findViewById(R.id.itemNameEx);
@@ -87,6 +89,12 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
                 public void onFinish() {
                     task.setStatus("overtime");
+                    overTime.setVisibility(View.VISIBLE);
+                    overTime.setTextColor(Color.WHITE);
+                    eDuration.setTextColor(Color.WHITE);
+                    eName.setTextColor(Color.WHITE);
+                    expanded.setBackgroundColor(Color.RED);
+
                     countUp(task);
                 }
             }.start();
@@ -234,8 +242,18 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         holder.cDuration.setText(task.getDuration());
         holder.eName.setText(task.getName());
 
-        holder.cName.setTextColor(Color.BLACK);
-        holder.cDuration.setTextColor(Color.BLACK);
+        if (task.getStatus().equals("overtime")) {
+            holder.overTime.setVisibility(View.VISIBLE);
+            holder.overTime.setTextColor(Color.WHITE);
+            holder.eDuration.setTextColor(Color.WHITE);
+            holder.eName.setTextColor(Color.WHITE);
+            holder.expanded.setBackgroundColor(Color.RED);
+
+        } else {
+            holder.cName.setTextColor(Color.BLACK);
+            holder.cDuration.setTextColor(Color.BLACK);
+        }
+
 
         holder.collapsed.setVisibility(View.GONE);
         holder.expanded.setVisibility(View.VISIBLE);

@@ -24,8 +24,9 @@ public class TabFragment3 extends Fragment {
 
     private Context mContext;
     LinearLayout widgetSpace;
-    AppWidgetManager mAppWidgetManager;
-    AppWidgetHost mAppWidgetHost;
+    AppWidgetManager appWidgetManager;
+    AppWidgetHost appWidgetHost;
+    DbHelper dbHelper;
 
     public TabFragment3() {
 
@@ -36,10 +37,16 @@ public class TabFragment3 extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_fragment3, container, false);
         mContext = getActivity().getApplicationContext();
-        widgetSpace = (LinearLayout) rootView.findViewById(R.id.widget_space);
 
-        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
-        mAppWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID);
+        dbHelper = new DbHelper(mContext);
+
+        widgetSpace = (LinearLayout) rootView.findViewById(R.id.widget_space);
+        appWidgetManager = AppWidgetManager.getInstance(mContext);
+        appWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID);
+        appWidgetHost.startListening();
+
+        getWidgets();
+
 
         widgetSpace.setOnLongClickListener(
                 new View.OnLongClickListener() {
@@ -54,12 +61,22 @@ public class TabFragment3 extends Fragment {
         return rootView;
     }
 
+    void getWidgets() {
+        ArrayList<String> widgets = dbHelper.getWidgets();
+
+        for (String s : widgets) {
+            int appWidgetId = Integer.parseInt(s);
+            AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
+            AppWidgetHostView hostView = appWidgetHost.createView(mContext, appWidgetId, appWidgetInfo);
+            hostView.setAppWidget(appWidgetId, appWidgetInfo);
+            // Add  it on the layout you want
+            widgetSpace.addView(hostView);
+        }
+    }
+
     final int APPWIDGET_HOST_ID = 2048;
     final int REQUEST_PICK_APPWIDGET = 0;
     final int REQUEST_CREATE_APPWIDGET = 5;
-
-    AppWidgetManager appWidgetManager;
-    AppWidgetHost appWidgetHost;
 
     // Let user pick a widget from the list of intalled AppWidgets
     public void selectWidget() {
@@ -120,6 +137,9 @@ public class TabFragment3 extends Fragment {
     public void createWidget(Intent data) {
         Bundle extras = data.getExtras();
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+
+        dbHelper.addWidget(appWidgetId);
+
         AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
 
         AppWidgetHostView hostView = appWidgetHost.createView(mContext, appWidgetId, appWidgetInfo);
@@ -137,18 +157,9 @@ public class TabFragment3 extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        appWidgetManager = AppWidgetManager.getInstance(mContext);
-        appWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID);
-
-        // Start listening to pending intents from the widgets
-        appWidgetHost.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         appWidgetHost.stopListening();
+        appWidgetHost = null;
     }
 }

@@ -26,7 +26,6 @@ class DbHelper extends SQLiteOpenHelper {
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String TABLE_NAME_TASKS = "tasks";
-    private static final String ID_TASKS = "_id";
     private static final String COLUMN_NAME_TNAME = "name";
     private static final String COLUMN_NAME_TDURATION = "duration";
     private static final String COLUMN_NAME_TSTATUS = "status";
@@ -35,7 +34,7 @@ class DbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_TASKS =
             "CREATE TABLE " + TABLE_NAME_TASKS + " (" +
-                    ID_TASKS + " INTEGER PRIMARY KEY autoincrement," +
+                    ID + " INTEGER PRIMARY KEY autoincrement," +
                     COLUMN_NAME_TNAME + " TEXT," +
                     COLUMN_NAME_TTYPE + " TEXT," +
                     COLUMN_NAME_TDURATION + " TEXT," +
@@ -44,6 +43,14 @@ class DbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_DELETE_TASKS =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+    private static final String TABLE_NAME_WIDGETS = "widgets";
+    private static final String COLUMN_NAME_WID = "name";
+
+    private static final String SQL_CREATE_WIDGETS =
+            "CREATE TABLE " + TABLE_NAME_WIDGETS + " (" +
+                    ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    COLUMN_NAME_WID + " TEXT)";
 
 
     DbHelper(Context context) {
@@ -54,12 +61,14 @@ class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);
         db.execSQL(SQL_CREATE_TASKS);
+        db.execSQL(SQL_CREATE_WIDGETS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_ENTRIES);
         db.execSQL(SQL_DELETE_TASKS);
+        db.execSQL(SQL_CREATE_WIDGETS);
         onCreate(db);
     }
 
@@ -158,5 +167,35 @@ class DbHelper extends SQLiteOpenHelper {
         String selection = COLUMN_NAME_LABEL + " LIKE ?";
         String[] selectionArgs = {label};
         db.delete(TABLE_NAME, selection, selectionArgs);
+    }
+
+    ArrayList<String> getWidgets() {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + TABLE_NAME_WIDGETS, null);
+
+        ArrayList<String> widgets = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                widgets.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_WID)));
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return widgets;
+    }
+
+    long addWidget(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME_WID, "" + id);
+
+        return db.insert(TABLE_NAME_WIDGETS, null, values);
+    }
+
+    void removeWidget(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        String selection = COLUMN_NAME_WID + " LIKE ?";
+        String[] selectionArgs = {"" + id};
+        db.delete(TABLE_NAME_WIDGETS, selection, selectionArgs);
     }
 }
