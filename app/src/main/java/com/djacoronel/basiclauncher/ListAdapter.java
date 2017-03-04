@@ -140,6 +140,11 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 timer.cancel();
             if (upTimer != null)
                 upTimer.stop();
+
+            overTime.setVisibility(View.GONE);
+            eName.setTextColor(Color.BLACK);
+            eDuration.setTextColor(Color.BLACK);
+            expanded.setBackgroundColor(Color.WHITE);
         }
     }
 
