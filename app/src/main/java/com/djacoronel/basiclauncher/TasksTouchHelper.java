@@ -24,7 +24,7 @@ class TasksTouchHelper extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        listAdapter.remove(viewHolder.getAdapterPosition());
+        listAdapter.onItemRemove(viewHolder.getAdapterPosition());
     }
 
     @Override

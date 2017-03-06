@@ -281,6 +281,8 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     interface MethodCaller {
         void addTask();
+
+        void dismissItem(int position);
     }
 
     @Override
@@ -322,4 +324,8 @@ class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.startTimer(task1);
     }
 
+
+    void onItemRemove(final int position) {
+        listener.dismissItem(position);
+    }
 }

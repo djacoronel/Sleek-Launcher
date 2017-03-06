@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -31,6 +33,7 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
     Context mContext;
     RecyclerView list;
     ListAdapter adapter;
+    CoordinatorLayout coordinator;
 
     public TabFragment1() {
 
@@ -42,6 +45,7 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
         rootView = inflater.inflate(R.layout.tab_fragment1, container, false);
         mContext = getActivity();
 
+        coordinator = (CoordinatorLayout) rootView.findViewById(R.id.coodinator);
         list = (RecyclerView) rootView.findViewById(R.id.task_list);
         loadTaskList();
 
@@ -63,6 +67,39 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
         helper.attachToRecyclerView(list);
     }
 
+
+    Task tempTask;
+
+    @Override
+    public void dismissItem(int position) {
+        tempTask = tasks.get(position);
+        Snackbar snackbar = Snackbar
+                .make(coordinator, "TASK DELETED", Snackbar.LENGTH_LONG)
+                .setAction("UNDO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        tasks.add(tasks.size() - 1, tempTask);
+                        adapter.notifyItemInserted(tasks.indexOf(tempTask));
+                        tempTask = null;
+                    }
+                }).addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int dismissType) {
+                        super.onDismissed(snackbar, dismissType);
+
+                        if (dismissType != DISMISS_EVENT_ACTION)
+                            tempTask.deleteFromDb();
+                    }
+                });
+
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)
+                snackbar.getView().getLayoutParams();
+        params.setMargins(0, 0, 0, 100);
+        snackbar.getView().setLayoutParams(params);
+        snackbar.show();
+        tasks.remove(position);
+        adapter.notifyItemRemoved(position);
+    }
 
     String duration, m = "0 minutes", h = "0 hours";
 
@@ -169,8 +206,8 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                collapsedLayout.setVisibility(View.GONE);
                 inputLayout.setVisibility(View.VISIBLE);
+                collapsedLayout.setVisibility(View.GONE);
                 name.requestFocus();
                 final InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(name, InputMethodManager.SHOW_IMPLICIT);
