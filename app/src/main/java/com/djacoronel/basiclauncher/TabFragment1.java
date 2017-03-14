@@ -71,15 +71,16 @@ public class TabFragment1 extends Fragment implements ListAdapter.MethodCaller {
     Task tempTask;
 
     @Override
-    public void dismissItem(int position) {
+    public void dismissItem(final int position) {
         tempTask = tasks.get(position);
+
         Snackbar snackbar = Snackbar
                 .make(coordinator, "TASK DELETED", Snackbar.LENGTH_LONG)
                 .setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        tasks.add(tasks.size() - 1, tempTask);
-                        adapter.notifyItemInserted(tasks.indexOf(tempTask));
+                        tasks.add(position, tempTask);
+                        adapter.notifyItemInserted(position);
                         tempTask = null;
                     }
                 }).addCallback(new Snackbar.Callback() {

@@ -51,18 +51,17 @@ public class TabFragment2 extends Fragment {
         };
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addDataScheme("package");
         mContext.registerReceiver(br, intentFilter);
 
         return rootView;
     }
 
-    public class AppDetail{
+    class AppDetail {
         CharSequence label, name;
         Drawable icon;
     }
-
-
 
     private void loadApps() {
         PackageManager manager = mContext.getPackageManager();
