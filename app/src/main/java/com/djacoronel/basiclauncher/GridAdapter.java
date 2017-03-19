@@ -105,9 +105,6 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.app_detail, parent, false);
-
-        int height = parent.getMeasuredHeight() / 6;
-        v.setMinimumHeight(height);
         return new ViewHolder(v);
     }
 
