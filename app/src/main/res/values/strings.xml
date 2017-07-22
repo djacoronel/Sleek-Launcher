@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Basic Launcher</string>
+    <string name="duration_expanded">00:00</string>
+    <string name="name_expanded">Name</string>
+    <string name="duration_input">00:00</string>
+    <string name="name_input">Name</string>
+    <string name="duration_collapsed">Duration</string>
+    <string name="name_collapsed">Task Name</string>
+    <string name="task_name_input">Task Name</string>
 </resources>
