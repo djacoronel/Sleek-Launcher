@@ -20,10 +20,10 @@ import java.util.List;
 
 class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     private PackageManager manager;
-    private List<TabFragment2.AppDetail> apps;
+    private List<MainActivity.AppDetail> apps;
     private Context mContext;
 
-    GridAdapter(List<TabFragment2.AppDetail> apps, Context context){
+    GridAdapter(List<MainActivity.AppDetail> apps, Context context) {
         this.apps = apps;
         mContext = context;
     }
