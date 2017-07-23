@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Icons">
+
+        <CheckBoxPreference
+            android:key="showHidden"
+            android:summary="Shows icons in hidden list"
+            android:title="Show hidden icons" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

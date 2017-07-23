@@ -70,4 +70,9 @@ class DbHelper extends SQLiteOpenHelper {
 
         return db.insert(TABLE_NAME, null, values);
     }
+
+    boolean removeFromHidden(String label) {
+        SQLiteDatabase db = getWritableDatabase();
+        return db.delete(TABLE_NAME, COLUMN_NAME_LABEL + "='" + label + "'", null) > 0;
+    }
 }
