@@ -22,7 +22,7 @@
         <activity
             android:name=".Settings"
             android:label="Settings"
-            android:theme="@android:style/Theme.Material">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
