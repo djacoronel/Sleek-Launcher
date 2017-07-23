@@ -6,6 +6,7 @@
     android:paddingBottom="20dp">
 
     <ImageView
+        android:contentDescription="@string/app_icon_alt"
         android:id="@+id/item_app_icon"
         android:layout_alignParentTop="true"
         android:layout_width="fill_parent"
@@ -24,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:singleLine="true"
+        android:maxLines="1"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="12sp" />

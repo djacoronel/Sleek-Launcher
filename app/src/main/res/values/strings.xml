@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Basic Launcher</string>
+    <string name="app_name">Basic</string>
     <string name="duration_expanded">00:00</string>
     <string name="name_expanded">Name</string>
     <string name="duration_input">00:00</string>
@@ -80,4 +80,5 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="app_icon_alt">App icon</string>
 </resources>
