@@ -40,12 +40,12 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                             manager = mContext.getPackageManager();
                             Intent i = manager.getLaunchIntentForPackage(apps.get(getAdapterPosition()).name.toString());
 
+                            // add Marshmallow opening animation
                             Bundle optsBundle;
                             ActivityOptions opts;
                             if (Build.VERSION.SDK_INT >= 23) {
                                 int left = 0, top = 0;
                                 int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
-
                                 opts = ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
                             } else {
                                 // Below L, we use a scale up animation
@@ -61,11 +61,12 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                     new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
-                            if (apps.get(getAdapterPosition()).label.toString().equals("Settings")) {
+                            // open launcher settings
+                            if (apps.get(getAdapterPosition()).label.toString().equals("Settings"))
                                 ((MainActivity) mContext).openSettings();
-                            } else {
+                            else
                                 ((MainActivity) mContext).iconLongClick(GridAdapter.this, getAdapterPosition());
-                            }
+
                             return false;
                         }
                     }

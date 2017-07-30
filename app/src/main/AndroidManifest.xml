@@ -20,12 +20,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Settings"
-            android:label="Settings"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+            android:name=".SettingsActivity"
+            android:label="SettingsActivity"
+            android:theme="@style/AppTheme"></activity>
+        <activity
+            android:name=".IconsActivity"
+            android:label="IconsActivity"
+            android:theme="@style/Base.V23.Theme.AppCompat">
         </activity>
     </application>
 

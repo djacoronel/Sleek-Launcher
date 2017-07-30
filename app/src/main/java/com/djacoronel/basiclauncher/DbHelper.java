@@ -17,13 +17,29 @@ class DbHelper extends SQLiteOpenHelper {
     private static final String ID = "_id";
     private static final String COLUMN_NAME_LABEL = "label";
 
-    private static final String SQL_CREATE_ENTRIES =
+    private static final String SQL_CREATE_HIDDEN =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     ID + " INTEGER PRIMARY KEY autoincrement," +
                     COLUMN_NAME_LABEL + " TEXT)";
 
-    private static final String SQL_DELETE_ENTRIES =
+    private static final String SQL_DELETE_HIDDEN =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+    private static final String TABLE_NAME_CUSTOM = "customapp";
+    private static final String ID_CUSTOM = "_id";
+    private static final String COLUMN_NAME_APPLABEL = "label";
+    private static final String COLUMN_NAME_CUSTOMLABEL = "customlabel";
+    private static final String COLUMN_NAME_CUSTOMICON = "icon";
+
+    private static final String SQL_CREATE_CUSTOM =
+            "CREATE TABLE " + TABLE_NAME_CUSTOM + " (" +
+                    ID_CUSTOM + " INTEGER PRIMARY KEY autoincrement," +
+                    COLUMN_NAME_APPLABEL + " TEXT," +
+                    COLUMN_NAME_CUSTOMLABEL + " TEXT," +
+                    COLUMN_NAME_CUSTOMICON + " TEXT)";
+
+    private static final String SQL_DELETE_CUSTOM =
+            "DROP TABLE IF EXISTS " + TABLE_NAME_CUSTOM;
 
 
     DbHelper(Context context) {
@@ -32,12 +48,14 @@ class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_HIDDEN);
+        db.execSQL(SQL_CREATE_CUSTOM);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL(SQL_DELETE_HIDDEN);
+        db.execSQL(SQL_DELETE_CUSTOM);
         onCreate(db);
     }
 
@@ -74,5 +92,40 @@ class DbHelper extends SQLiteOpenHelper {
     boolean removeFromHidden(String label) {
         SQLiteDatabase db = getWritableDatabase();
         return db.delete(TABLE_NAME, COLUMN_NAME_LABEL + "='" + label + "'", null) > 0;
+    }
+
+    String[] getCustom(String label) {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + TABLE_NAME_CUSTOM + " where label='" + label + "'", null);
+        String customInfo[] = new String[2];
+        if (cursor.moveToFirst()) {
+            customInfo[0] = cursor.getString(cursor.getColumnIndex("icon"));
+            customInfo[1] = cursor.getString(cursor.getColumnIndex("customlabel"));
+        }
+
+        cursor.close();
+        return customInfo;
+    }
+
+    void removeAllFromCustom() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(SQL_DELETE_CUSTOM);
+        db.execSQL(SQL_CREATE_CUSTOM);
+    }
+
+    long addToCustom(String label, String customicon, String customlabel) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_NAME, COLUMN_NAME_LABEL + "='" + label + "'", null);
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME_APPLABEL, label);
+        values.put(COLUMN_NAME_CUSTOMLABEL, customlabel);
+        values.put(COLUMN_NAME_CUSTOMICON, customicon);
+
+        return db.insert(TABLE_NAME_CUSTOM, null, values);
+    }
+
+    boolean removeFromCustom(String label) {
+        SQLiteDatabase db = getWritableDatabase();
+        return db.delete(TABLE_NAME_CUSTOM, COLUMN_NAME_APPLABEL + "='" + label + "'", null) > 0;
     }
 }
