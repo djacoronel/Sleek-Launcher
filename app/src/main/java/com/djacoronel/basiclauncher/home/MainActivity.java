@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.home;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,6 +22,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.djacoronel.basiclauncher.R;
+import com.djacoronel.basiclauncher.data.DbHelper;
+import com.djacoronel.basiclauncher.iconutils.IconPackManager;
+import com.djacoronel.basiclauncher.iconutils.IconsActivity;
+import com.djacoronel.basiclauncher.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;

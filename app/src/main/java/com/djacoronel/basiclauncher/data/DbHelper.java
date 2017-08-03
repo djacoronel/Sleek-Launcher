@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 
-class DbHelper extends SQLiteOpenHelper {
+public class DbHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "basiclauncher.db";
@@ -42,7 +42,7 @@ class DbHelper extends SQLiteOpenHelper {
             "DROP TABLE IF EXISTS " + TABLE_NAME_CUSTOM;
 
 
-    DbHelper(Context context) {
+    public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -64,7 +64,7 @@ class DbHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    ArrayList<String> getHiddenList() {
+    public ArrayList<String> getHiddenList() {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("select * from " + TABLE_NAME, null);
 
@@ -81,7 +81,7 @@ class DbHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    long addToHidden(String label) {
+    public long addToHidden(String label) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_LABEL, label);
@@ -89,12 +89,12 @@ class DbHelper extends SQLiteOpenHelper {
         return db.insert(TABLE_NAME, null, values);
     }
 
-    boolean removeFromHidden(String label) {
+    public boolean removeFromHidden(String label) {
         SQLiteDatabase db = getWritableDatabase();
         return db.delete(TABLE_NAME, COLUMN_NAME_LABEL + "='" + label + "'", null) > 0;
     }
 
-    String[] getCustom(String label) {
+    public String[] getCustom(String label) {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("select * from " + TABLE_NAME_CUSTOM + " where label='" + label + "'", null);
         String customInfo[] = new String[2];
@@ -107,15 +107,15 @@ class DbHelper extends SQLiteOpenHelper {
         return customInfo;
     }
 
-    void removeAllFromCustom() {
+    public void removeAllFromCustom() {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(SQL_DELETE_CUSTOM);
         db.execSQL(SQL_CREATE_CUSTOM);
     }
 
-    long addToCustom(String label, String customicon, String customlabel) {
+    public long addToCustom(String label, String customicon, String customlabel) {
         SQLiteDatabase db = getWritableDatabase();
-        db.delete(TABLE_NAME, COLUMN_NAME_LABEL + "='" + label + "'", null);
+        db.delete(TABLE_NAME_CUSTOM, COLUMN_NAME_APPLABEL + "='" + label + "'", null);
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_APPLABEL, label);
         values.put(COLUMN_NAME_CUSTOMLABEL, customlabel);
@@ -124,7 +124,7 @@ class DbHelper extends SQLiteOpenHelper {
         return db.insert(TABLE_NAME_CUSTOM, null, values);
     }
 
-    boolean removeFromCustom(String label) {
+    public boolean removeFromCustom(String label) {
         SQLiteDatabase db = getWritableDatabase();
         return db.delete(TABLE_NAME_CUSTOM, COLUMN_NAME_APPLABEL + "='" + label + "'", null) > 0;
     }

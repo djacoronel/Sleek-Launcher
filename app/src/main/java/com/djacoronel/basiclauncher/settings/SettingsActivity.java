@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.settings;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,6 +9,10 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+
+import com.djacoronel.basiclauncher.R;
+import com.djacoronel.basiclauncher.data.DbHelper;
+import com.djacoronel.basiclauncher.iconutils.IconPackManager;
 
 import java.util.HashMap;
 

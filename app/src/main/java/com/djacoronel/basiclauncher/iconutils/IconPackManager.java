@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.iconutils;
 
 
 import android.content.Context;
@@ -16,15 +16,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class IconPackManager {
+public class IconPackManager {
 
     private Context mContext;
 
-    IconPackManager(Context context) {
+    public IconPackManager(Context context) {
         mContext = context;
     }
 
-    HashMap<String, String> getAvailableIconPacks() {
+    public HashMap<String, String> getAvailableIconPacks() {
         HashMap<String, String> iconPacks = new HashMap<>();
         iconPacks.put("Default", "");
 
@@ -49,7 +49,7 @@ class IconPackManager {
         return iconPacks;
     }
 
-    Drawable loadDrawable(String drawableName, String packageName) {
+    public Drawable loadDrawable(String drawableName, String packageName) {
         PackageManager pm = mContext.getPackageManager();
 
         Resources iconPackRes = null;
@@ -71,7 +71,7 @@ class IconPackManager {
         PackageManager pm = mContext.getPackageManager();
 
         try {
-            XmlPullParser xpp = null;
+            XmlPullParser xpp;
 
             // load app drawable xml from the icon pack package
             Resources iconPackRes = pm.getResourcesForApplication(packageName);
@@ -98,13 +98,13 @@ class IconPackManager {
         return icons;
     }
 
-    HashMap<String, String> load(String packageName) {
+    public HashMap<String, String> load(String packageName) {
         HashMap<String, String> mPackagesDrawables = new HashMap<>();
 
         PackageManager pm = mContext.getPackageManager();
 
         try {
-            XmlPullParser xpp = null;
+            XmlPullParser xpp;
 
             // load app filter xml from the icon pack package
             Resources iconPackRes = pm.getResourcesForApplication(packageName);

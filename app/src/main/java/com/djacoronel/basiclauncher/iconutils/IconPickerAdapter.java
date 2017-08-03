@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.iconutils;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.djacoronel.basiclauncher.R;
 
 import java.util.List;
 

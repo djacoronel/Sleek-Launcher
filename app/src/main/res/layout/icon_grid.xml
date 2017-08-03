@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+<com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/icon_grid"
+    app:fastScrollTrackColor="@color/colorAccent"
     android:layout_width="match_parent"
-    android:id="@+id/icon_grid" />
+    android:layout_height="wrap_content"
+    app:fastScrollThumbColor="@color/accent_material_dark" />

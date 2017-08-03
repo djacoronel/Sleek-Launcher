@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.basiclauncher.home;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.djacoronel.basiclauncher.R;
 
 import java.util.List;
 
