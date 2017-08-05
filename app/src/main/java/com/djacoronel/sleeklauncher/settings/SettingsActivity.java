@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.settings;
+package com.djacoronel.sleeklauncher.settings;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,9 +10,9 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 
-import com.djacoronel.basiclauncher.R;
-import com.djacoronel.basiclauncher.data.DbHelper;
-import com.djacoronel.basiclauncher.iconutils.IconPackManager;
+import com.djacoronel.sleeklauncher.R;
+import com.djacoronel.sleeklauncher.data.DbHelper;
+import com.djacoronel.sleeklauncher.iconutils.IconPackManager;
 
 import java.util.HashMap;
 

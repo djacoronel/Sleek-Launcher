@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.data;
+package com.djacoronel.sleeklauncher.data;
 
 import android.content.ContentValues;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.iconutils;
+package com.djacoronel.sleeklauncher.iconutils;
 
 
 import android.content.Context;

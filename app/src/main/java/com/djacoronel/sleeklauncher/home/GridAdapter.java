@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.home;
+package com.djacoronel.sleeklauncher.home;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.djacoronel.basiclauncher.R;
+import com.djacoronel.sleeklauncher.R;
 
 import java.util.List;
 

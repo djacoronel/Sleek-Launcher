@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.iconutils;
+package com.djacoronel.sleeklauncher.iconutils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.djacoronel.basiclauncher.R;
+import com.djacoronel.sleeklauncher.R;
 
 import java.util.List;
 

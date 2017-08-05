@@ -1,4 +1,4 @@
-package com.djacoronel.basiclauncher.home;
+package com.djacoronel.sleeklauncher.home;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -23,11 +23,11 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.djacoronel.basiclauncher.R;
-import com.djacoronel.basiclauncher.data.DbHelper;
-import com.djacoronel.basiclauncher.iconutils.IconPackManager;
-import com.djacoronel.basiclauncher.iconutils.IconsActivity;
-import com.djacoronel.basiclauncher.settings.SettingsActivity;
+import com.djacoronel.sleeklauncher.R;
+import com.djacoronel.sleeklauncher.data.DbHelper;
+import com.djacoronel.sleeklauncher.iconutils.IconPackManager;
+import com.djacoronel.sleeklauncher.iconutils.IconsActivity;
+import com.djacoronel.sleeklauncher.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
