@@ -157,7 +157,7 @@ public class MainActivity extends Activity {
 
         AlertDialog.Builder dBuilder = new AlertDialog.Builder(this)
                 .setTitle("Options")
-                .setMessage("Uninstall or hide the app?")
+                .setMessage("Touch the icon to apply theme.")
                 .setCancelable(true)
                 .setNegativeButton("Uninstall", new DialogInterface.OnClickListener() {
                     @Override
@@ -273,7 +273,6 @@ public class MainActivity extends Activity {
                 String customIcon = data.getStringExtra("customicon");
                 changeIcon(customIcon);
             }
-
         }
     }
 
