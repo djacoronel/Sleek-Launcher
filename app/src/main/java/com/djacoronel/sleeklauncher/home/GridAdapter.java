@@ -1,12 +1,9 @@
-package com.djacoronel.basiclauncher;
+package com.djacoronel.sleeklauncher.home;
 
 import android.app.ActivityOptions;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.djacoronel.sleeklauncher.R;
 
 import java.util.List;
 
@@ -43,14 +42,14 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                             manager = mContext.getPackageManager();
                             Intent i = manager.getLaunchIntentForPackage(apps.get(getAdapterPosition()).name.toString());
 
-                            Bundle optsBundle = null;
-                            ActivityOptions opts = null;
+                            // add Marshmallow opening animation
+                            Bundle optsBundle;
+                            ActivityOptions opts;
                             if (Build.VERSION.SDK_INT >= 23) {
                                 int left = 0, top = 0;
                                 int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
-
                                 opts = ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
-                            } else if (!(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)) {
+                            } else {
                                 // Below L, we use a scale up animation
                                 opts = ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
                             }
@@ -64,35 +63,11 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                     new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
-                            if(apps.get(getAdapterPosition()).label.toString().equals("Settings")){
-                                Intent I = new Intent(mContext,Settings.class);
-                                mContext.startActivity(I);
-                            } else {
-                                AlertDialog dialog = new AlertDialog.Builder(mContext)
-                                        .setTitle("Options")
-                                        .setMessage("Uninstall or hide the app?")
-                                        .setCancelable(true)
-                                        .setPositiveButton("Uninstall", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                Uri packageUri = Uri.parse("package:" + apps.get(getAdapterPosition()).name.toString());
-                                                Intent uninstallIntent =
-                                                        new Intent(Intent.ACTION_DELETE, packageUri);
-                                                mContext.startActivity(uninstallIntent);
-                                            }
-                                        })
-                                        .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                DbHelper dbHelper = new DbHelper(mContext);
-                                                dbHelper.addToHidden(apps.get(getAdapterPosition()).label.toString());
-                                                apps.remove(getAdapterPosition());
-                                                notifyDataSetChanged();
-                                            }
-                                        })
-                                        .create();
-                                dialog.show();
-                            }
+                            // open launcher settings
+                            if (apps.get(getAdapterPosition()).label.toString().equals("Settings"))
+                                ((MainActivity) mContext).openSettings();
+                            else
+                                ((MainActivity) mContext).iconLongClick(GridAdapter.this, getAdapterPosition());
 
                             return false;
                         }
