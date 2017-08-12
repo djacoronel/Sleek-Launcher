@@ -1,6 +1,7 @@
 package com.djacoronel.sleeklauncher.home;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
@@ -141,6 +143,32 @@ public class MainActivity extends Activity {
         adapter = new GridAdapter(apps, this);
         grid.setLayoutManager(new GridLayoutManager(this, 4));
         grid.setAdapter(adapter);
+    }
+
+    public void launchApp(int position, View v) {
+        PackageManager manager = getPackageManager();
+        Intent i = manager.getLaunchIntentForPackage(apps.get(position).name.toString());
+
+
+        // add Marshmallow opening animation
+        Bundle optsBundle;
+        ActivityOptions opts;
+        if (Build.VERSION.SDK_INT >= 23) {
+            int left = 0, top = 0;
+            int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
+            opts = ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
+        } else {
+            // Below L, we use a scale up animation
+            opts = ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
+        }
+        optsBundle = opts != null ? opts.toBundle() : null;
+        if (i != null)
+            startActivity(i, optsBundle);
+        else {
+            Toast.makeText(MainActivity.this, "App cannot be found", Toast.LENGTH_SHORT).show();
+            apps.remove(position);
+            loadAppGrid();
+        }
     }
 
 
