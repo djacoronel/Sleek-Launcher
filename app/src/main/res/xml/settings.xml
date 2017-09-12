@@ -16,6 +16,10 @@
             android:key="resetIcons"
             android:title="Reset Icons"
             android:summary="Reset all icons to default" />
+        <Preference
+            android:key="backgroundPref"
+            android:title="Background Settings"
+            android:summary="Change background color, transparency and blur"/>
 
     </PreferenceCategory>
 </PreferenceScreen>

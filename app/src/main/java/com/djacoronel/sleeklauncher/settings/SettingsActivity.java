@@ -3,6 +3,7 @@ package com.djacoronel.sleeklauncher.settings;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -38,6 +39,7 @@ public class SettingsActivity extends PreferenceActivity {
         private void customListPref() {
             ListPreference customListPref = (ListPreference) findPreference("iconPack");
             Preference resetPref = findPreference("resetIcons");
+            Preference bgPref = findPreference("backgroundPref");
 
             // get available icon packs
             IconPackManager icManager = new IconPackManager(getActivity());
@@ -98,6 +100,17 @@ public class SettingsActivity extends PreferenceActivity {
                             .setPositiveButton("Cancel", null)
                             .create();
                     alertDialog.show();
+                    return false;
+                }
+            });
+
+            // background pref
+            bgPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getActivity().getApplicationContext(), BackgroundSettingsActivity.class);
+                    startActivity(intent);
+
                     return false;
                 }
             });

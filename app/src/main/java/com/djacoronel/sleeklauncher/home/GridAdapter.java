@@ -45,7 +45,7 @@ class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
                             if (apps.get(getAdapterPosition()).label.toString().equals("Settings"))
                                 ((MainActivity) mContext).openSettings();
                             else
-                                ((MainActivity) mContext).iconLongClick(GridAdapter.this, getAdapterPosition());
+                                ((MainActivity) mContext).iconLongClick(getAdapterPosition());
 
                             return false;
                         }

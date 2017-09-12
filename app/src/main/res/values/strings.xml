@@ -2,4 +2,11 @@
     <string name="app_name">Sleek Launcher</string>
     <string name="title_activity_settings">Settings</string>
     <string name="app_icon_alt">App Icon</string>
+    <string name="red_label">Red</string>
+    <string name="green_label">Green</string>
+    <string name="blue_label">Blue</string>
+    <string name="preview_content_description">Preview of background settings</string>
+    <string name="Opacity_label">Opacity</string>
+    <string name="blur_label">Blur</string>
+    <string name="brightness_label">Brightness</string>
 </resources>
