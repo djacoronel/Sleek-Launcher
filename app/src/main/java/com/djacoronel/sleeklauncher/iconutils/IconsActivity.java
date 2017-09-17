@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 
 import com.djacoronel.sleeklauncher.R;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class IconsActivity extends AppCompatActivity {
@@ -18,25 +19,31 @@ public class IconsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_icons);
 
-        this.setTitle(getIntent().getStringExtra("iconpackname"));
+        this.setTitle(getIntent().getStringExtra("iconpack"));
+
 
         loadIconsGrid();
     }
 
+    String getIconPackPackageName(String iconPack){
+        IconPackManager icManager = new IconPackManager(this);
+        HashMap<String, String> iconPacks = icManager.getAvailableIconPacks();
+        return iconPacks.get(iconPack);
+    }
+
     public void loadIconsGrid() {
         IconPackManager icManager = new IconPackManager(this);
-        List<String> icons = icManager.getAllIcons(getIntent().getStringExtra("iconpack"));
-        String iconPack = getIntent().getStringExtra("iconpack");
+        String icPackageName = getIconPackPackageName(getIntent().getStringExtra("iconpack"));
+        List<String> icons = icManager.getAllIcons(icPackageName);
 
         RecyclerView grid = (RecyclerView) findViewById(R.id.icon_grid);
-        IconPickerAdapter adapter = new IconPickerAdapter(icons, iconPack, this);
+        IconPickerAdapter adapter = new IconPickerAdapter(icons, icPackageName, this);
         grid.setLayoutManager(new GridLayoutManager(this, 4));
         grid.setAdapter(adapter);
     }
 
-    public void pickIcon(String customIcon) {
-        String packageName = getIntent().getStringExtra("iconpack");
-
+    public void setIconAsResult(String customIcon) {
+        String packageName = getIconPackPackageName(getIntent().getStringExtra("iconpack"));
         Intent returnIntent = new Intent();
         returnIntent.putExtra("customicon", customIcon + "/" + packageName);
         setResult(Activity.RESULT_OK, returnIntent);

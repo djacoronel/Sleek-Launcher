@@ -11,23 +11,28 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.djacoronel.sleeklauncher.home.MainActivity">
+        <activity android:name=".home.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.djacoronel.sleeklauncher.settings.SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="SettingsActivity"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
-            android:name="com.djacoronel.sleeklauncher.iconutils.IconsActivity"
+            android:name=".iconutils.IconsActivity"
             android:label="IconsActivity"
-            android:theme="@style/Base.V23.Theme.AppCompat">
-        </activity>
+            android:theme="@style/Base.V23.Theme.AppCompat"/>
+
+        <activity android:name=".settings.BackgroundSettingsActivity"
+            android:label="Background"
+            android:theme="@style/AppTheme.Wallpaper" />
     </application>
 
 </manifest>

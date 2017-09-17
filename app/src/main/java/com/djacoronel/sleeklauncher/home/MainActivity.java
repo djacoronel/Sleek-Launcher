@@ -46,7 +46,6 @@ public class MainActivity extends Activity {
     int selectedAppPosition;
     ImageView image;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,74 +55,36 @@ public class MainActivity extends Activity {
 
         loadApps();
         loadAppGrid();
+        setupGridRefreshing();
 
-        // refresh app grid when app is installed or uninstalled
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        intentFilter.addDataScheme("package");
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadApps();
-                loadAppGrid();
-            }
-        };
-        this.registerReceiver(br, intentFilter);
-
-        // make status bar and navigation bar transparent
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        // This line makes status bar and navigation bar transparent
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
-
-
-    @Override
-    public void onBackPressed() {
-    }
-
 
     class AppDetail {
         CharSequence label, name;
         Drawable icon;
     }
 
-
-    private void loadApps() {
+    void loadApps() {
         PackageManager manager = this.getPackageManager();
         DbHelper dbHelper = new DbHelper(this);
         ArrayList<String> hidden = dbHelper.getHiddenList();
         apps = new ArrayList<>();
 
-        // get settings
         boolean showHidden = preferences.getBoolean("showHidden", false);
-        String selectedIconPack = preferences.getString("iconPack", "");
-        IconPackManager icManager = new IconPackManager(this);
-        HashMap<String, String> components = icManager.load(selectedIconPack);
 
-        // get installed apps
-        Intent i = new Intent(Intent.ACTION_MAIN, null);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> availableActivities = manager.queryIntentActivities(i, 0);
+        List<ResolveInfo> availableActivities = getInstalledAppsInfo();
 
         for (ResolveInfo ri : availableActivities) {
             if (!hidden.contains(ri.loadLabel(manager)) || showHidden) {
-
                 AppDetail app = new AppDetail();
                 app.label = ri.loadLabel(manager);
                 app.name = ri.activityInfo.packageName;
+                app.icon = ri.activityInfo.loadIcon(manager);
 
-                String customInfo[] = dbHelper.getCustom((String) app.label);
-
-                // get custom icon
-                if (customInfo[0] != null) {
-                    String iconInfo[] = customInfo[0].split("/");
-                    app.icon = icManager.loadDrawable(iconInfo[0], iconInfo[1]);
-                }
-                // get themed icon if available
-                else if (!selectedIconPack.equals("") && components.get(app.name) != null
-                        && icManager.loadDrawable(components.get(app.name), selectedIconPack) != null)
-                    app.icon = icManager.loadDrawable(components.get(app.name), selectedIconPack);
-                else
-                    app.icon = ri.activityInfo.loadIcon(manager);
+                app.icon = getCustomAppIcon(app);
 
                 apps.add(app);
             }
@@ -137,6 +98,33 @@ public class MainActivity extends Activity {
         });
     }
 
+    List<ResolveInfo> getInstalledAppsInfo() {
+        Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        return getPackageManager().queryIntentActivities(intent, 0);
+    }
+
+    Drawable getCustomAppIcon(AppDetail app){
+        DbHelper dbHelper = new DbHelper(this);
+        IconPackManager icManager = new IconPackManager(this);
+
+        String selectedIconPack = preferences.getString("iconPack", "");
+        HashMap<String, String> icPackComponents = icManager.load(selectedIconPack);
+
+        String customInfo[] = dbHelper.getCustom((String) app.label);
+
+        // get custom icon
+        if (customInfo[0] != null) {
+            String iconInfo[] = customInfo[0].split("/");
+            return icManager.loadDrawable(iconInfo[0], iconInfo[1]);
+        }
+        // get themed icon if available
+        else if (!selectedIconPack.equals("") && icPackComponents.get(app.name) != null
+                && icManager.loadDrawable(icPackComponents.get(app.name), selectedIconPack) != null)
+            return icManager.loadDrawable(icPackComponents.get(app.name), selectedIconPack);
+        else
+            return app.icon;
+    }
 
     public void loadAppGrid() {
         RecyclerView grid = (RecyclerView) findViewById(R.id.app_grid);
@@ -145,29 +133,44 @@ public class MainActivity extends Activity {
         grid.setAdapter(adapter);
     }
 
+    void setupGridRefreshing() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addDataScheme("package");
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadApps();
+                loadAppGrid();
+            }
+        };
+        this.registerReceiver(br, intentFilter);
+    }
+
+
     public void launchApp(int position, View v) {
         PackageManager manager = getPackageManager();
-        Intent i = manager.getLaunchIntentForPackage(apps.get(position).name.toString());
+        Intent intent = manager.getLaunchIntentForPackage(apps.get(position).name.toString());
+        Bundle optsBundle = getMarshmallowOpeningAnimationOpts(v).toBundle();
 
-
-        // add Marshmallow opening animation
-        Bundle optsBundle;
-        ActivityOptions opts;
-        if (Build.VERSION.SDK_INT >= 23) {
-            int left = 0, top = 0;
-            int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
-            opts = ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
-        } else {
-            // Below L, we use a scale up animation
-            opts = ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
-        }
-        optsBundle = opts != null ? opts.toBundle() : null;
-        if (i != null)
-            startActivity(i, optsBundle);
+        if (intent != null)
+            startActivity(intent, optsBundle);
         else {
             Toast.makeText(MainActivity.this, "App cannot be found", Toast.LENGTH_SHORT).show();
             apps.remove(position);
             loadAppGrid();
+        }
+    }
+
+    ActivityOptions getMarshmallowOpeningAnimationOpts(View v){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int left = 0, top = 0;
+            int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
+            return ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
+        } else {
+            // Below L, we use a scale up animation
+            return ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
         }
     }
 
@@ -177,32 +180,39 @@ public class MainActivity extends Activity {
         startActivityForResult(I, 1);
     }
 
+    public void iconLongClick(final int position) {
+        selectedAppPosition = position;
+        AlertDialog.Builder longClickDialog = buildLongClickDialog();
+        longClickDialog = setButtonNameAndActions(longClickDialog);
+        longClickDialog = setDialogIcon(longClickDialog);
+        longClickDialog.create().show();
+    }
 
-    public void iconLongClick(final GridAdapter adapter, final int position) {
-        final DbHelper dbHelper = new DbHelper(this);
-        ArrayList<String> hidden = dbHelper.getHiddenList();
-        final boolean showHidden = preferences.getBoolean("showHidden", false);
-
-        AlertDialog.Builder dBuilder = new AlertDialog.Builder(this)
+    AlertDialog.Builder buildLongClickDialog(){
+        return new AlertDialog.Builder(this)
                 .setTitle("Options")
                 .setMessage("Touch the icon to apply theme.")
                 .setCancelable(true)
                 .setNegativeButton("Uninstall", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Uri packageUri = Uri.parse("package:" + apps.get(position).name.toString());
+                        Uri packageUri = Uri.parse("package:" + apps.get(selectedAppPosition).name.toString());
                         Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
                         startActivity(uninstallIntent);
                     }
                 });
+    }
 
+    AlertDialog.Builder setButtonNameAndActions(AlertDialog.Builder dBuilder){
+        final DbHelper dbHelper = new DbHelper(this);
+        ArrayList<String> hidden = dbHelper.getHiddenList();
+        final boolean showHidden = preferences.getBoolean("showHidden", false);
 
-        // set hide and unhide buttons
-        if (hidden.contains(apps.get(position).label.toString())) {
+        if (hidden.contains(apps.get(selectedAppPosition).label.toString())) {
             dBuilder.setPositiveButton("Unhide", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    dbHelper.removeFromHidden(apps.get(position).label.toString());
+                    dbHelper.removeFromHidden(apps.get(selectedAppPosition).label.toString());
                     Toast.makeText(MainActivity.this, "App removed from hidden",
                             Toast.LENGTH_LONG).show();
                 }
@@ -211,9 +221,9 @@ public class MainActivity extends Activity {
             dBuilder.setPositiveButton("Hide", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    dbHelper.addToHidden(apps.get(position).label.toString());
+                    dbHelper.addToHidden(apps.get(selectedAppPosition).label.toString());
                     if (!showHidden) {
-                        apps.remove(position);
+                        apps.remove(selectedAppPosition);
                         adapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(MainActivity.this, "App marked as hidden, unshow marked apps in settings",
@@ -222,74 +232,71 @@ public class MainActivity extends Activity {
                 }
             });
         }
+        return dBuilder;
+    }
 
-
-        // add app icon to alert dialog
+    AlertDialog.Builder setDialogIcon(AlertDialog.Builder dBuilder){
         image = new ImageView(this);
-        Bitmap bitmap = ((BitmapDrawable) apps.get(position).icon).getBitmap();
+        Bitmap bitmap = ((BitmapDrawable) apps.get(selectedAppPosition).icon).getBitmap();
         Drawable icon = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 200, 200, true));
         image.setImageDrawable(icon);
         image.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        pickIcon();
-                        selectedAppPosition = position;
+                        showIconPackList();
                     }
                 }
         );
-        dBuilder.setView(image).create().show();
+        dBuilder.setView(image);
+        return dBuilder;
     }
 
-
-    public void pickIcon() {
+    public void showIconPackList() {
         IconPackManager icManager = new IconPackManager(this);
         final HashMap<String, String> iconPacks = icManager.getAvailableIconPacks();
         final String[] iconPackNames = iconPacks.keySet().toArray(new String[0]);
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
-                .setTitle("Icon Packs")
-                .setItems(iconPackNames, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(MainActivity.this, iconPackNames[which], Toast.LENGTH_SHORT).show();
-
-                        if (iconPackNames[which].equals("Default")) {
-                            //set default icons
-                            DbHelper dbHelper = new DbHelper(MainActivity.this);
-
-                            AppDetail app = apps.get(selectedAppPosition);
-                            dbHelper.removeFromCustom((String) app.label);
-                            try {
-                                // change icon in grid
-                                Drawable icon = getPackageManager().getApplicationIcon((String) app.name);
-                                app.icon = icon;
-                                adapter.notifyItemChanged(selectedAppPosition);
-
-                                // change icon in dialog
-                                Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
-                                icon = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 200, 200, true));
-                                image.setImageDrawable(icon);
-
-                            } catch (PackageManager.NameNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            // launch icon picker for selected pack
-                            Intent intent = new Intent(getBaseContext(), IconsActivity.class);
-                            intent.putExtra("iconpack", iconPacks.get(iconPackNames[which]));
-                            intent.putExtra("iconpackname", iconPackNames[which]);
-
-                            startActivityForResult(intent, 2);
-                        }
-
-                    }
-                });
-        AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+        AlertDialog icPackListDialog = buildIconPackList(iconPackNames);
+        icPackListDialog.show();
     }
 
+    AlertDialog buildIconPackList(final String[] iconPackNames){
+        return new AlertDialog.Builder(this)
+                .setTitle("Icon Packs")
+                .setItems(iconPackNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (iconPackNames[which].equals("Default")) {
+                            setDefaultIcon();
+                        } else {
+                            String selectedIconPack = iconPackNames[which];
+                            launchIconPickerGridForSelectedPack(selectedIconPack);
+                        }
+                    }
+                }).create();
+    }
+
+    void setDefaultIcon(){
+        DbHelper dbHelper = new DbHelper(MainActivity.this);
+        AppDetail app = apps.get(selectedAppPosition);
+        dbHelper.removeFromCustom((String) app.label);
+        try {
+            Drawable icon = getPackageManager().getApplicationIcon((String) app.name);
+            changeIconInGrid(icon);
+            changeIconInDialog(icon);
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void launchIconPickerGridForSelectedPack(String selectedIconPack){
+        Intent intent = new Intent(getBaseContext(), IconsActivity.class);
+        intent.putExtra("iconpack", selectedIconPack);
+
+        startActivityForResult(intent, 2);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -304,21 +311,27 @@ public class MainActivity extends Activity {
         }
     }
 
-
     public void changeIcon(String customIcon) {
         String iconProp[] = customIcon.split("/");
-
-        // change icon in grid
         Drawable icon = new IconPackManager(this).loadDrawable(iconProp[0], iconProp[1]);
+
+        changeIconInGrid(icon);
+        changeIconInDialog(icon);
+        changeIconInDatabase(customIcon);
+    }
+
+    void changeIconInGrid(Drawable icon){
         apps.get(selectedAppPosition).icon = icon;
         adapter.notifyItemChanged(selectedAppPosition);
+    }
 
-        // change icon in dialog
+    void changeIconInDialog(Drawable icon){
         Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
         icon = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 200, 200, true));
         image.setImageDrawable(icon);
+    }
 
-        // save custom icon in database
+    void changeIconInDatabase(String customIcon){
         String label = (String) apps.get(selectedAppPosition).label;
         DbHelper dbHelper = new DbHelper(this);
         dbHelper.addToCustom(label, customIcon, "");
@@ -326,6 +339,10 @@ public class MainActivity extends Activity {
 
 
     public void changeLabel() {
+        //TODO: Implement custom label on app grid
+    }
 
+    @Override
+    public void onBackPressed() {
     }
 }

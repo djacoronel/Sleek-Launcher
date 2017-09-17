@@ -33,7 +33,7 @@ class IconPickerAdapter extends RecyclerView.Adapter<IconPickerAdapter.ViewHolde
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((IconsActivity) mContext).pickIcon(icons.get(getAdapterPosition()));
+                            ((IconsActivity) mContext).setIconAsResult(icons.get(getAdapterPosition()));
                         }
                     }
             );
