@@ -55,29 +55,11 @@ public class MainActivity extends Activity {
 
         loadApps();
         loadAppGrid();
-        setupRefreshGridWhenPackageIsAddedOrRemoved();
+        setupGridRefreshing();
 
         // This line makes status bar and navigation bar transparent
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-    }
-
-    void setupRefreshGridWhenPackageIsAddedOrRemoved() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        intentFilter.addDataScheme("package");
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadApps();
-                loadAppGrid();
-            }
-        };
-        this.registerReceiver(br, intentFilter);
-    }
-
-    @Override
-    public void onBackPressed() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
     class AppDetail {
@@ -151,6 +133,22 @@ public class MainActivity extends Activity {
         grid.setAdapter(adapter);
     }
 
+    void setupGridRefreshing() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addDataScheme("package");
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadApps();
+                loadAppGrid();
+            }
+        };
+        this.registerReceiver(br, intentFilter);
+    }
+
+
     public void launchApp(int position, View v) {
         PackageManager manager = getPackageManager();
         Intent intent = manager.getLaunchIntentForPackage(apps.get(position).name.toString());
@@ -175,6 +173,7 @@ public class MainActivity extends Activity {
             return ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
         }
     }
+
 
     public void openSettings() {
         Intent I = new Intent(this, SettingsActivity.class);
@@ -341,5 +340,9 @@ public class MainActivity extends Activity {
 
     public void changeLabel() {
         //TODO: Implement custom label on app grid
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 }
