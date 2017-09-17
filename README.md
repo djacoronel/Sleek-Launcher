@@ -3,6 +3,7 @@ This is just a simplistic launcher that is basically just an app drawer. Also me
 
 Wasn't really able to focus on the architecture of the app that's why the the structure isn't that cohesive. Will work on code architecture over time.
 
+Long press settings icon to go into launcher settings.
 Tested only on marshmallow and up.
 <p>
   <img src="../master/screenshots/screen1.png" width="250"/>
