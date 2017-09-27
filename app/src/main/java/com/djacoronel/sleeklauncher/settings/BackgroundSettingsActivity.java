@@ -57,7 +57,6 @@ public class BackgroundSettingsActivity extends Activity {
         WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
         final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
 
-
         setupSeekBar(transparencyBar);
         setupSeekBar(redBar);
         setupSeekBar(greenBar);
