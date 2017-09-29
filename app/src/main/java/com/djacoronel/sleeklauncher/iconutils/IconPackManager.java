@@ -28,25 +28,27 @@ public class IconPackManager {
         HashMap<String, String> iconPacks = new HashMap<>();
         iconPacks.put("Default", "");
 
-        // find apps with "Theme" intent and return build the HashMap
+        ArrayList<ResolveInfo> rInfos = getIconPackRInfos();
+
+        for (ResolveInfo ri : rInfos) {
+            String packageName = ri.activityInfo.packageName;
+            String label = (String) ri.loadLabel(mContext.getPackageManager());
+            iconPacks.put(label, packageName);
+        }
+        return iconPacks;
+    }
+
+    private ArrayList<ResolveInfo> getIconPackRInfos(){
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> novaThemes = pm.queryIntentActivities(new Intent("com.teslacoilsw.launcher.THEME"), PackageManager.GET_META_DATA);
         List<ResolveInfo> adwThemes = pm.queryIntentActivities(new Intent("org.adw.launcher.THEMES"), PackageManager.GET_META_DATA);
         List<ResolveInfo> goThemes = pm.queryIntentActivities(new Intent("com.gau.go.launcherex.theme"), PackageManager.GET_META_DATA);
 
-        // merge those lists
-        ArrayList<ResolveInfo> rInfo = new ArrayList<>();
-        rInfo.addAll(novaThemes);
-        rInfo.addAll(adwThemes);
-        rInfo.addAll(goThemes);
-
-        // add list to hash map
-        for (ResolveInfo ri : rInfo) {
-            String packageName = ri.activityInfo.packageName;
-            String label = (String) ri.loadLabel(pm);
-            iconPacks.put(label, packageName);
-        }
-        return iconPacks;
+        ArrayList<ResolveInfo> rInfos = new ArrayList<>();
+        rInfos.addAll(novaThemes);
+        rInfos.addAll(adwThemes);
+        rInfos.addAll(goThemes);
+        return rInfos;
     }
 
     public Drawable loadDrawable(String drawableName, String packageName) {
