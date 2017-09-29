@@ -76,10 +76,16 @@ public class MainActivity extends Activity {
         int blur = Integer.parseInt(argbBlur[4]);
 
         if (blur == 0) {
-            getWindow().getDecorView().setBackgroundColor(Color.argb(argb[0], argb[1], argb[2], argb[3]));
+            loadBackgroundWithColorFilter(argb);
         } else {
             loadBackgroundWithBlur(argb,blur);
         }
+    }
+
+    void loadBackgroundWithColorFilter(int argb[]){
+        ImageView mainBg = (ImageView) findViewById(R.id.mainBackground);
+        mainBg.setVisibility(View.GONE);
+        getWindow().getDecorView().setBackgroundColor(Color.argb(argb[0], argb[1], argb[2], argb[3]));
     }
 
     void loadBackgroundWithBlur(int argb[],int blur){
@@ -98,6 +104,7 @@ public class MainActivity extends Activity {
             blurredBitmap = BlurBuilder.blur(this, blurredBitmap, remainingBlur);
         }
 
+        mainBg.setVisibility(View.VISIBLE);
         mainBg.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]));
         mainBg.setImageDrawable(new BitmapDrawable(getResources(), blurredBitmap));
         mainBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -378,7 +385,6 @@ public class MainActivity extends Activity {
         DbHelper dbHelper = new DbHelper(this);
         dbHelper.addToCustom(label, customIcon, "");
     }
-
 
     public void changeLabel() {
         //TODO: Implement custom label on app grid
