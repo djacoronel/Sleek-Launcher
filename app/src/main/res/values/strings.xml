@@ -9,4 +9,6 @@
     <string name="Opacity_label">Opacity</string>
     <string name="blur_label">Blur</string>
     <string name="brightness_label">Brightness</string>
+    <string name="apply_bgpref_button">Apply</string>
+    <string name="main_background_content_description">Main Background</string>
 </resources>

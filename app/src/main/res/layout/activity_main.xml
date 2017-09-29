@@ -8,7 +8,8 @@
     <ImageView
         android:id="@+id/mainBackground"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:contentDescription="@string/main_background_content_description" />
     <include layout="@layout/app_grid" />
 
     <View
