@@ -20,7 +20,6 @@
         android:layout_marginTop="0dp"
         android:contentDescription="@string/preview_content_description" />
 
-
     <TabHost
         android:layout_width="0dp"
         android:layout_height="300dp"
@@ -71,4 +70,23 @@
             </FrameLayout>
         </LinearLayout>
     </TabHost>
+
+    <TextView
+        android:id="@+id/apply"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="0dp"
+        android:background="#99000000"
+        android:gravity="center_vertical"
+        android:text="Apply"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@android:color/white"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/preview" />
+
 </android.support.constraint.ConstraintLayout>

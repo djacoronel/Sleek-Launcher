@@ -3,6 +3,7 @@ package com.djacoronel.sleeklauncher.home;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -30,6 +32,7 @@ import com.djacoronel.sleeklauncher.data.DbHelper;
 import com.djacoronel.sleeklauncher.iconutils.IconPackManager;
 import com.djacoronel.sleeklauncher.iconutils.IconsActivity;
 import com.djacoronel.sleeklauncher.settings.SettingsActivity;
+import com.djacoronel.sleeklauncher.settings.BlurBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +56,7 @@ public class MainActivity extends Activity {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        loadBackground();
         loadApps();
         loadAppGrid();
         setupGridRefreshing();
@@ -60,6 +64,43 @@ public class MainActivity extends Activity {
         // This line makes status bar and navigation bar transparent
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+    }
+
+    void loadBackground() {
+        String bgPref = preferences.getString("bgPref", "0,0,0,0,0");
+        String argbBlur[] = bgPref.split(",");
+        int argb[] = {Integer.parseInt(argbBlur[0]),
+                Integer.parseInt(argbBlur[1]),
+                Integer.parseInt(argbBlur[2]),
+                Integer.parseInt(argbBlur[3])};
+        int blur = Integer.parseInt(argbBlur[4]);
+
+        if (blur == 0) {
+            getWindow().getDecorView().setBackgroundColor(Color.argb(argb[0], argb[1], argb[2], argb[3]));
+        } else {
+            loadBackgroundWithBlur(argb,blur);
+        }
+    }
+
+    void loadBackgroundWithBlur(int argb[],int blur){
+        ImageView mainBg = (ImageView) findViewById(R.id.mainBackground);
+        Drawable wallpaperDrawable = WallpaperManager.getInstance(this).getDrawable();
+        Bitmap blurredBitmap = ((BitmapDrawable) wallpaperDrawable).getBitmap();
+
+        int numberOfFullBlur = blur / 25;
+        int remainingBlur = blur % 25;
+
+        for (int i = 0; i < numberOfFullBlur; i++) {
+            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, 25);
+        }
+
+        if (remainingBlur != 0) {
+            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, remainingBlur);
+        }
+
+        mainBg.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]));
+        mainBg.setImageDrawable(new BitmapDrawable(getResources(), blurredBitmap));
+        mainBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
     }
 
     class AppDetail {
@@ -104,7 +145,7 @@ public class MainActivity extends Activity {
         return getPackageManager().queryIntentActivities(intent, 0);
     }
 
-    Drawable getCustomAppIcon(AppDetail app){
+    Drawable getCustomAppIcon(AppDetail app) {
         DbHelper dbHelper = new DbHelper(this);
         IconPackManager icManager = new IconPackManager(this);
 
@@ -163,7 +204,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    ActivityOptions getMarshmallowOpeningAnimationOpts(View v){
+    ActivityOptions getMarshmallowOpeningAnimationOpts(View v) {
         if (Build.VERSION.SDK_INT >= 23) {
             int left = 0, top = 0;
             int width = v.getMeasuredWidth(), height = v.getMeasuredHeight();
@@ -188,7 +229,7 @@ public class MainActivity extends Activity {
         longClickDialog.create().show();
     }
 
-    AlertDialog.Builder buildLongClickDialog(){
+    AlertDialog.Builder buildLongClickDialog() {
         return new AlertDialog.Builder(this)
                 .setTitle("Options")
                 .setMessage("Touch the icon to apply theme.")
@@ -203,7 +244,7 @@ public class MainActivity extends Activity {
                 });
     }
 
-    AlertDialog.Builder setButtonNameAndActions(AlertDialog.Builder dBuilder){
+    AlertDialog.Builder setButtonNameAndActions(AlertDialog.Builder dBuilder) {
         final DbHelper dbHelper = new DbHelper(this);
         ArrayList<String> hidden = dbHelper.getHiddenList();
         final boolean showHidden = preferences.getBoolean("showHidden", false);
@@ -235,7 +276,7 @@ public class MainActivity extends Activity {
         return dBuilder;
     }
 
-    AlertDialog.Builder setDialogIcon(AlertDialog.Builder dBuilder){
+    AlertDialog.Builder setDialogIcon(AlertDialog.Builder dBuilder) {
         image = new ImageView(this);
         Bitmap bitmap = ((BitmapDrawable) apps.get(selectedAppPosition).icon).getBitmap();
         Drawable icon = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 200, 200, true));
@@ -261,7 +302,7 @@ public class MainActivity extends Activity {
         icPackListDialog.show();
     }
 
-    AlertDialog buildIconPackList(final String[] iconPackNames){
+    AlertDialog buildIconPackList(final String[] iconPackNames) {
         return new AlertDialog.Builder(this)
                 .setTitle("Icon Packs")
                 .setItems(iconPackNames, new DialogInterface.OnClickListener() {
@@ -277,7 +318,7 @@ public class MainActivity extends Activity {
                 }).create();
     }
 
-    void setDefaultIcon(){
+    void setDefaultIcon() {
         DbHelper dbHelper = new DbHelper(MainActivity.this);
         AppDetail app = apps.get(selectedAppPosition);
         dbHelper.removeFromCustom((String) app.label);
@@ -291,7 +332,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    void launchIconPickerGridForSelectedPack(String selectedIconPack){
+    void launchIconPickerGridForSelectedPack(String selectedIconPack) {
         Intent intent = new Intent(getBaseContext(), IconsActivity.class);
         intent.putExtra("iconpack", selectedIconPack);
 
@@ -303,6 +344,7 @@ public class MainActivity extends Activity {
         if (requestCode == 1) {
             loadApps();
             loadAppGrid();
+            loadBackground();
         } else if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 String customIcon = data.getStringExtra("customicon");
@@ -320,18 +362,18 @@ public class MainActivity extends Activity {
         changeIconInDatabase(customIcon);
     }
 
-    void changeIconInGrid(Drawable icon){
+    void changeIconInGrid(Drawable icon) {
         apps.get(selectedAppPosition).icon = icon;
         adapter.notifyItemChanged(selectedAppPosition);
     }
 
-    void changeIconInDialog(Drawable icon){
+    void changeIconInDialog(Drawable icon) {
         Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
         icon = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 200, 200, true));
         image.setImageDrawable(icon);
     }
 
-    void changeIconInDatabase(String customIcon){
+    void changeIconInDatabase(String customIcon) {
         String label = (String) apps.get(selectedAppPosition).label;
         DbHelper dbHelper = new DbHelper(this);
         dbHelper.addToCustom(label, customIcon, "");

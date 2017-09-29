@@ -7,10 +7,10 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
-class BlurBuilder {
+public class BlurBuilder {
     private static final float BITMAP_SCALE = 0.4f;
 
-    static Bitmap blur(Context context, Bitmap image, float radius) {
+    public static Bitmap blur(Context context, Bitmap image, float radius) {
         int width = Math.round(image.getWidth() * BITMAP_SCALE);
         int height = Math.round(image.getHeight() * BITMAP_SCALE);
 
