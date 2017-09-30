@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         loadBackground();
+        setupBackgroundRefreshing();
         loadApps();
         loadAppGrid();
         setupGridRefreshing();
@@ -78,20 +80,20 @@ public class MainActivity extends Activity {
         if (blur == 0) {
             loadBackgroundWithColorFilter(argb);
         } else {
-            loadBackgroundWithBlur(argb,blur);
+            loadBackgroundWithBlur(argb, blur);
         }
     }
 
-    void loadBackgroundWithColorFilter(int argb[]){
+    void loadBackgroundWithColorFilter(int argb[]) {
         ImageView mainBg = (ImageView) findViewById(R.id.mainBackground);
         mainBg.setVisibility(View.GONE);
         getWindow().getDecorView().setBackgroundColor(Color.argb(argb[0], argb[1], argb[2], argb[3]));
     }
 
-    void loadBackgroundWithBlur(int argb[],int blur){
+    void loadBackgroundWithBlur(int argb[], int blur) {
         ImageView mainBg = (ImageView) findViewById(R.id.mainBackground);
         Drawable wallpaperDrawable = WallpaperManager.getInstance(this).getDrawable();
-        Bitmap blurredBitmap = ((BitmapDrawable) wallpaperDrawable).getBitmap();
+        Bitmap blurredBitmap = cropWallpaper(((BitmapDrawable) wallpaperDrawable).getBitmap());
 
         int numberOfFullBlur = blur / 25;
         int remainingBlur = blur % 25;
@@ -107,7 +109,29 @@ public class MainActivity extends Activity {
         mainBg.setVisibility(View.VISIBLE);
         mainBg.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]));
         mainBg.setImageDrawable(new BitmapDrawable(getResources(), blurredBitmap));
-        mainBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mainBg.setScaleType(ImageView.ScaleType.FIT_CENTER);
+    }
+
+    Bitmap cropWallpaper(Bitmap wallpaper) {
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+
+        return Bitmap.createBitmap(wallpaper, 0, 0, width, height);
+    }
+
+    @SuppressWarnings("deprecation")
+    void setupBackgroundRefreshing(){
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadBackground();
+            }
+        };
+        this.registerReceiver(br, intentFilter);
     }
 
     class AppDetail {
@@ -195,7 +219,6 @@ public class MainActivity extends Activity {
         };
         this.registerReceiver(br, intentFilter);
     }
-
 
     public void launchApp(int position, View v) {
         PackageManager manager = getPackageManager();
