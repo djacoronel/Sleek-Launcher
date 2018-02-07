@@ -99,11 +99,11 @@ public class MainActivity extends Activity {
         int remainingBlur = blur % 25;
 
         for (int i = 0; i < numberOfFullBlur; i++) {
-            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, 25);
+            blurredBitmap = new BlurBuilder().blur(this, blurredBitmap, 25);
         }
 
         if (remainingBlur != 0) {
-            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, remainingBlur);
+            blurredBitmap = new BlurBuilder().blur(this, blurredBitmap, remainingBlur);
         }
 
         mainBg.setVisibility(View.VISIBLE);

@@ -135,11 +135,11 @@ public class BackgroundSettingsActivity extends Activity {
         int remainingBlur = progress % 25;
 
         for (int i = 0; i < numberOfFullBlur; i++) {
-            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, 25);
+            blurredBitmap = new BlurBuilder().blur(this, blurredBitmap, 25);
         }
 
         if (remainingBlur != 0) {
-            blurredBitmap = BlurBuilder.blur(this, blurredBitmap, remainingBlur);
+            blurredBitmap = new BlurBuilder().blur(this, blurredBitmap, remainingBlur);
         }
 
         preview.setImageDrawable(new BitmapDrawable(getResources(), blurredBitmap));
