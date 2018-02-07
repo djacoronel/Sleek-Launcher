@@ -20,4 +20,7 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector
     abstract fun bindIconsActivity(): IconsActivity
+
+    @ContributesAndroidInjector
+    abstract fun bindPrefsFragment(): SettingsActivity.PrefsFragment
 }

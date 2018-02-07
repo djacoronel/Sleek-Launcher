@@ -2,7 +2,7 @@ package com.djacoronel.sleeklauncher.data.room
 
 import android.arch.persistence.room.*
 import android.arch.persistence.room.OnConflictStrategy.REPLACE
-import com.djacoronel.sleeklauncher.data.IconPrefs
+import com.djacoronel.sleeklauncher.data.model.IconPrefs
 
 /**
 * Created by djacoronel on 2/7/18.
@@ -13,8 +13,8 @@ interface IconPrefsDao{
     @Query("SELECT * FROM iconPrefs")
     fun getAllIconPrefs(): List<IconPrefs>
 
-    @Query("SELECT * FROM iconPrefs WHERE id = :iconPrefsId")
-    fun getIconPrefs(): IconPrefs
+    @Query("SELECT * FROM iconPrefs WHERE appName = :appName")
+    fun getIconPrefs(appName: String): IconPrefs?
 
     @Insert (onConflict = REPLACE)
     fun addIconPrefs(iconPrefs: IconPrefs)
@@ -24,4 +24,7 @@ interface IconPrefsDao{
 
     @Delete
     fun deleteIconPrefs(iconPrefs: IconPrefs)
+
+    @Query("DELETE FROM iconPrefs")
+    fun resetIconPrefs()
 }

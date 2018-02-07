@@ -2,7 +2,7 @@ package com.djacoronel.sleeklauncher.data.room
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
-import com.djacoronel.sleeklauncher.data.IconPrefs
+import com.djacoronel.sleeklauncher.data.model.IconPrefs
 
 /**
 * Created by djacoronel on 2/7/18.
