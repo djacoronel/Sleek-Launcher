@@ -1,40 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.djacoronel.sleeklauncher">
+  package="com.djacoronel.sleeklauncher">
 
-    <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.VIBRATE"/>
 
-    <application
-        android:allowBackup="true"
-        android:fullBackupContent="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".home.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Wallpaper"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+  <application
+    android:allowBackup="true"
+    android:fullBackupContent="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:name=".App"
+    android:supportsRtl="true"
+    android:theme="@style/AppTheme">
+    <activity
+      android:launchMode="singleTask"
+      android:name=".home.MainActivity"
+      android:screenOrientation="portrait"
+      android:theme="@style/AppTheme.Wallpaper">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".settings.SettingsActivity"
-            android:label="SettingsActivity"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".iconutils.IconsActivity"
-            android:label="IconsActivity"
-            android:theme="@style/Base.V23.Theme.AppCompat"/>
+        <category android:name="android.intent.category.HOME"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <activity
+      android:label="SettingsActivity"
+      android:name=".settings.SettingsActivity"
+      android:theme="@style/AppTheme"/>
+    <activity
+      android:label="IconsActivity"
+      android:name=".iconutils.IconsActivity"
+      android:theme="@style/Base.V23.Theme.AppCompat"/>
 
-        <activity android:name=".settings.BackgroundSettingsActivity"
-            android:label="Background"
-            android:theme="@style/AppTheme" />
-    </application>
+    <activity
+      android:label="Background"
+      android:name=".settings.BackgroundSettingsActivity"
+      android:theme="@style/AppTheme"/>
+  </application>
 
 </manifest>

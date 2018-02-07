@@ -3,10 +3,10 @@ package com.djacoronel.sleeklauncher.data
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import org.jetbrains.anko.db.*
 import java.util.*
 
-class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class DbHelper(context: Context) : ManagedSQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(SQL_CREATE_HIDDEN)
