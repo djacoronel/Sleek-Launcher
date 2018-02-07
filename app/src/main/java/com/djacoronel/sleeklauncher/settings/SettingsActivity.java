@@ -33,43 +33,16 @@ public class SettingsActivity extends PreferenceActivity {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.settings);
-            customListPref();
+            setupCustomListPref();
+            setupResetPref();
+            setupBgPref();
         }
 
-        private void customListPref() {
+        private void setupCustomListPref() {
             ListPreference customListPref = (ListPreference) findPreference("iconPack");
-            Preference resetPref = findPreference("resetIcons");
-            Preference bgPref = findPreference("backgroundPref");
 
-            // get available icon packs
-            IconPackManager icManager = new IconPackManager(getActivity());
-            HashMap<String, String> iconPacks = icManager.getAvailableIconPacks();
-
-            // set list preference entries
-            CharSequence[] entries = iconPacks.keySet().toArray(new CharSequence[0]);
-            CharSequence[] entryValues = iconPacks.values().toArray(new CharSequence[0]);
-            customListPref.setEntries(entries);
-            customListPref.setEntryValues(entryValues);
-
-            // set list preference values
             customListPref.setDialogTitle("Available Icon Packs");
             customListPref.setPersistent(true);
-
-            // get stored preference
-            final SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-            String icon_pack = sharedPref.getString(customListPref.getKey(), "Default");
-
-            int index = customListPref.findIndexOfValue(icon_pack);
-
-            if (index != -1) {
-                customListPref.setSummary(entries[index]);
-                customListPref.setValueIndex(index);
-            } else {
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(customListPref.getKey(), "");
-                editor.apply();
-            }
-            // list selection action
             customListPref.setOnPreferenceChangeListener(
                     new Preference.OnPreferenceChangeListener() {
                         @Override
@@ -80,7 +53,42 @@ public class SettingsActivity extends PreferenceActivity {
                     }
             );
 
-            // reset icons
+            setCustomListEntries(customListPref);
+            setSavedPrefSummary(customListPref);
+        }
+
+        ListPreference setCustomListEntries(ListPreference customListPref){
+            IconPackManager icManager = new IconPackManager(getActivity());
+            HashMap<String, String> iconPacks = icManager.getAvailableIconPacks();
+            CharSequence[] entries = iconPacks.keySet().toArray(new CharSequence[0]);
+            CharSequence[] entryValues = iconPacks.values().toArray(new CharSequence[0]);
+
+            customListPref.setEntries(entries);
+            customListPref.setEntryValues(entryValues);
+
+            return customListPref;
+        }
+
+        ListPreference setSavedPrefSummary(ListPreference customListPref){
+            final SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            String icon_pack = sharedPref.getString(customListPref.getKey(), "Default");
+            CharSequence entries[] = customListPref.getEntries();
+            int index = customListPref.findIndexOfValue(icon_pack);
+
+            if (index != -1) {
+                customListPref.setSummary(entries[index]);
+                customListPref.setValueIndex(index);
+            } else {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(customListPref.getKey(), "");
+                editor.apply();
+            }
+
+            return customListPref;
+        }
+
+        void setupResetPref(){
+            Preference resetPref = findPreference("resetIcons");
             resetPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -103,8 +111,10 @@ public class SettingsActivity extends PreferenceActivity {
                     return false;
                 }
             });
+        }
 
-            // background pref
+        void setupBgPref(){
+            Preference bgPref = findPreference("backgroundPref");
             bgPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {

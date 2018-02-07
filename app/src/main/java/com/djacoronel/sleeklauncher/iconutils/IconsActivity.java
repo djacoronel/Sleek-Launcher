@@ -21,7 +21,6 @@ public class IconsActivity extends AppCompatActivity {
 
         this.setTitle(getIntent().getStringExtra("iconpack"));
 
-
         loadIconsGrid();
     }
 

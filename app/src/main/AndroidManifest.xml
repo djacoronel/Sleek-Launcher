@@ -12,7 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".home.MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Wallpaper"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,7 +34,7 @@
 
         <activity android:name=".settings.BackgroundSettingsActivity"
             android:label="Background"
-            android:theme="@style/AppTheme.Wallpaper" />
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
