@@ -23,25 +23,21 @@ class IconPackManager(private val mContext: Context) {
             iconPacks.put("Default", "")
 
             val rInfos = iconPackRInfos
-
             for (ri in rInfos) {
                 val packageName = ri.activityInfo.packageName
                 val label = ri.loadLabel(mContext.packageManager) as String
                 iconPacks.put(label, packageName)
             }
+
             return iconPacks
         }
 
-    val iconPackRInfos: ArrayList<ResolveInfo>
+    private val iconPackRInfos: ArrayList<ResolveInfo>
         get() {
             val pm = mContext.packageManager
-            val novaThemes = pm
-                    .queryIntentActivities(Intent("com.teslacoilsw.launcher.THEME"),
-                            PackageManager.GET_META_DATA)
-            val adwThemes = pm
-                    .queryIntentActivities(Intent("org.adw.launcher.THEMES"), PackageManager.GET_META_DATA)
-            val goThemes = pm.queryIntentActivities(Intent("com.gau.go.launcherex.theme"),
-                    PackageManager.GET_META_DATA)
+            val novaThemes = pm.queryIntentActivities(Intent("com.teslacoilsw.launcher.THEME"), PackageManager.GET_META_DATA)
+            val adwThemes = pm.queryIntentActivities(Intent("org.adw.launcher.THEMES"), PackageManager.GET_META_DATA)
+            val goThemes = pm.queryIntentActivities(Intent("com.gau.go.launcherex.theme"), PackageManager.GET_META_DATA)
 
             val rInfos = ArrayList<ResolveInfo>()
             rInfos.addAll(novaThemes)
@@ -63,7 +59,7 @@ class IconPackManager(private val mContext: Context) {
         }
     }
 
-    internal fun getAllIcons(packageName: String): List<String> {
+    fun getAllIcons(packageName: String): List<String> {
         val icons = ArrayList<String>()
         val pm = mContext.packageManager
 
@@ -119,8 +115,7 @@ class IconPackManager(private val mContext: Context) {
                         val end = if (componentName.contains("/")) componentName.indexOf("/")
                         else componentName.indexOf("}")
 
-                        if (start != -1 && end != -1)
-                            componentName = componentName.substring(start, end)
+                        if (start != -1 && end != -1) componentName = componentName.substring(start, end)
 
                         mPackagesDrawables.put(componentName, drawableName)
                     }
