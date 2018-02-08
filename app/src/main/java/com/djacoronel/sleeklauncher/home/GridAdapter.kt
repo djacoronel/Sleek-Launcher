@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.djacoronel.sleeklauncher.R
 import com.djacoronel.sleeklauncher.data.model.AppDetail
 import kotlinx.android.synthetic.main.app_detail.view.*
-import org.jetbrains.anko.toast
 
 class GridAdapter(private val apps: List<AppDetail>, private val mContext: Context) : RecyclerView.Adapter<GridAdapter.ViewHolder>() {
 
@@ -41,12 +40,13 @@ class GridAdapter(private val apps: List<AppDetail>, private val mContext: Conte
 
     override fun getItemCount(): Int = apps.size
 
-    fun getApp(appName: String): AppDetail{
+    fun getApp(appName: String): AppDetail {
         val app = apps.find { it.name == appName }
         return app!!
     }
 
-    fun removeApp(app: AppDetail){
+    fun removeApp(appName: String) {
+        val app = apps.find { it.name == appName }
         val index = apps.indexOf(app)
         (apps as MutableList).removeAt(index)
         notifyItemRemoved(index)

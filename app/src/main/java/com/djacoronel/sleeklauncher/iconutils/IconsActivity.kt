@@ -13,7 +13,7 @@ class IconsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_icons)
-        title = intent.getStringExtra("iconpack")
+        title = intent.getStringExtra("iconPack")
         loadIconsGrid()
     }
 
@@ -26,7 +26,7 @@ class IconsActivity : AppCompatActivity() {
 
     private fun loadIconsGrid() {
         val icManager = IconPackManager(this)
-        val icPackageName = getIconPackPackageName(intent.getStringExtra("iconpack"))
+        val icPackageName = getIconPackPackageName(intent.getStringExtra("iconPack"))
         val icons = icManager.getAllIcons(icPackageName)
 
         val adapter = IconPickerAdapter(icons, icPackageName, this)
@@ -35,9 +35,9 @@ class IconsActivity : AppCompatActivity() {
     }
 
     fun setIconAsResult(customIcon: String) {
-        val packageName = getIconPackPackageName(intent.getStringExtra("iconpack"))
+        val packageName = getIconPackPackageName(intent.getStringExtra("iconPack"))
         val returnIntent = Intent()
-        returnIntent.putExtra("customicon", customIcon + "/" + packageName)
+        returnIntent.putExtra("customIcon", customIcon + "/" + packageName)
         returnIntent.putExtra("appName", intent.getStringExtra("appName"))
         setResult(Activity.RESULT_OK, returnIntent)
         finish()

@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import com.djacoronel.sleeklauncher.data.model.IconPrefs
+import com.djacoronel.sleeklauncher.home.MainActivity
 
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -131,5 +133,41 @@ class IconPackManager(private val mContext: Context) {
         }
 
         return mPackagesDrawables
+    }
+
+    fun getAppIcon(appName: String): Drawable? {
+        val selectedIconPack = (mContext as MainActivity).preferences.getString("iconPack", "")
+        val iconPrefs = mContext.iconPrefsDao.getIconPrefs(appName)
+
+        // get custom icon
+        if (iconPrefs != null && iconPrefs.iconName != IconPrefs.NO_CUSTOM_ICON) {
+            val iconInfo = iconPrefs.iconName
+            val split = iconInfo.split("/")
+            val iconDrawable = split[0]
+            val iconPackage = split[1]
+            return loadDrawable(iconDrawable, iconPackage)
+        } else if (selectedIconPack != "") {
+            val icPackComponents = load(selectedIconPack)
+
+            if (icPackComponents[appName] != null && loadDrawable(icPackComponents[appName]!!, selectedIconPack) != null) {
+                return loadDrawable(icPackComponents[appName]!!, selectedIconPack)
+            } else {
+                try {
+                    return mContext.packageManager.getApplicationIcon(appName)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    e.printStackTrace()
+                }
+
+                return null
+            }
+        } else {
+            try {
+                return mContext.packageManager.getApplicationIcon(appName)
+            } catch (e: PackageManager.NameNotFoundException) {
+                e.printStackTrace()
+            }
+
+            return null
+        }// get themed icon if available
     }
 }

@@ -36,9 +36,6 @@ import java.util.*
 import javax.inject.Inject
 
 class MainActivity : Activity() {
-
-    private var apps: MutableList<AppDetail>? = null
-
     @Inject
     lateinit var iconPrefsDao: IconPrefsDao
     @Inject
@@ -46,13 +43,6 @@ class MainActivity : Activity() {
 
     private lateinit var adapter: GridAdapter
     private lateinit var dialogIcon: ImageView
-
-    private val installedAppsInfo: List<ResolveInfo>
-        get() {
-            val intent = Intent(Intent.ACTION_MAIN, null)
-            intent.addCategory(Intent.CATEGORY_LAUNCHER)
-            return packageManager.queryIntentActivities(intent, 0)
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +52,6 @@ class MainActivity : Activity() {
         loadBackground()
         setupBackgroundRefreshing()
         loadApps()
-        loadAppGrid()
         setupGridRefreshing()
 
         // This makes status bar and navigation bar transparent
@@ -129,79 +118,40 @@ class MainActivity : Activity() {
     }
 
     private fun loadApps() {
-        val manager = this.packageManager
-
-        apps = ArrayList()
-
+        val manager = packageManager
+        val apps = mutableListOf<AppDetail>()
         val showHidden = preferences.getBoolean("showHidden", false)
-
-        val availableActivities = installedAppsInfo
+        val availableActivities = getInstalledAppsInfo()
 
         for (ri in availableActivities) {
             val name = ri.activityInfo.packageName
             var label = ri.loadLabel(manager) as String
-            var icon: Drawable?
 
             val iconPrefs = iconPrefsDao.getIconPrefs(name)
+            val icon = IconPackManager(this).getAppIcon(name)!!
 
-            icon = getAppIcon(name)
-
-            if (iconPrefs != null) {
-                if (iconPrefs.label != IconPrefs.NO_CUSTOM_LABEL) {
-                    label = iconPrefs.label
-                }
-                if (!iconPrefs.isHidden || showHidden) {
-                    val app = AppDetail(label, name, icon!!)
-                    apps!!.add(app)
-                }
-            } else {
-                val app = AppDetail(label, name, icon!!)
-                apps!!.add(app)
+            iconPrefs?.let {
+                if (it.label != IconPrefs.NO_CUSTOM_LABEL) label = it.label
+                if (!it.isHidden || showHidden) apps.add(AppDetail(label, name, icon))
+            }
+            if (iconPrefs == null) {
+                val app = AppDetail(label, name, icon)
+                apps.add(app)
             }
         }
 
-        Collections.sort(apps!!) { a1, a2 -> a1.label.compareTo(a2.label, ignoreCase = true) }
+        Collections.sort(apps) { a1, a2 -> a1.label.compareTo(a2.label, true) }
+        loadAppGrid(apps)
     }
 
-    private fun getAppIcon(appName: String): Drawable? {
-        val icManager = IconPackManager(this)
-        val selectedIconPack = preferences.getString("iconPack", "")
-        val iconPrefs = iconPrefsDao.getIconPrefs(appName)
-
-        // get custom icon
-        if (iconPrefs != null && iconPrefs.iconName != IconPrefs.NO_CUSTOM_ICON) {
-            val iconInfo = iconPrefs.iconName
-            val split = iconInfo.split("/")
-            val iconDrawable = split[0]
-            val iconPackage = split[1]
-            return icManager.loadDrawable(iconDrawable, iconPackage)
-        } else if (selectedIconPack != "") {
-            val icPackComponents = icManager.load(selectedIconPack)
-
-            if (icPackComponents[appName] != null && icManager.loadDrawable(icPackComponents[appName]!!, selectedIconPack) != null) {
-                return icManager.loadDrawable(icPackComponents[appName]!!, selectedIconPack)
-            } else {
-                try {
-                    return packageManager.getApplicationIcon(appName)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    e.printStackTrace()
-                }
-
-                return null
-            }
-        } else {
-            try {
-                return packageManager.getApplicationIcon(appName)
-            } catch (e: PackageManager.NameNotFoundException) {
-                e.printStackTrace()
-            }
-
-            return null
-        }// get themed icon if available
+    private fun getInstalledAppsInfo(): List<ResolveInfo> {
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        return packageManager.queryIntentActivities(intent, 0)
     }
 
-    fun loadAppGrid() {
-        adapter = GridAdapter(apps!!, this)
+    private fun loadAppGrid(apps: List<AppDetail>) {
+        adapter = GridAdapter(apps, this)
         app_grid.layoutManager = GridLayoutManager(this, 4)
         app_grid.adapter = adapter
     }
@@ -214,7 +164,6 @@ class MainActivity : Activity() {
         val br = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 loadApps()
-                loadAppGrid()
             }
         }
         this.registerReceiver(br, intentFilter)
@@ -229,7 +178,7 @@ class MainActivity : Activity() {
             startActivity(intent, optsBundle)
         } else {
             toast("App not found! :(")
-            adapter.removeApp(app)
+            adapter.removeApp(app.name)
         }
     }
 
@@ -248,21 +197,14 @@ class MainActivity : Activity() {
         }
     }
 
-    fun openSettings() {
-        val intent = Intent(this, SettingsActivity::class.java)
-        startActivityForResult(intent, 1)
-    }
-
     fun iconLongClick(app: AppDetail) {
-        val showHidden = preferences.getBoolean("showHidden", false)
-
         dialogIcon = ImageView(this)
         val bitmap = (app.icon as BitmapDrawable).bitmap
         val icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(bitmap, 200, 200, true))
         dialogIcon.setImageDrawable(icon)
         dialogIcon.setOnClickListener { showIconPackList(app) }
 
-        val longClickAlert = alert {
+        alert {
             title = "Options"
             message = "Tap icon to change it."
             isCancelable = true
@@ -272,50 +214,34 @@ class MainActivity : Activity() {
                 val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
                 startActivity(uninstallIntent)
             }
-        }
 
-        val iconPrefs = iconPrefsDao.getIconPrefs(app.name)
-
-        if (iconPrefs == null) {
-            longClickAlert.positiveButton("Hide") {
-                val newIconPrefs = IconPrefs(app.name)
-                newIconPrefs.isHidden = true
-                iconPrefsDao.addIconPrefs(newIconPrefs)
-
-                toast("App marked as hidden!")
-
-                if (!showHidden) {
-                    adapter.removeApp(app)
-                }
+            val iconPrefs = iconPrefsDao.getIconPrefs(app.name)
+            if (iconPrefs == null)
+                positiveButton("Hide") { hideIcon(IconPrefs(app.name)) }
+            else {
+                if (!iconPrefs.isHidden) positiveButton("Hide") { hideIcon(iconPrefs) }
+                else positiveButton("Show") { unHideIcon(iconPrefs) }
             }
-        } else {
-            if (iconPrefs.isHidden) {
-                longClickAlert.positiveButton("Unhide") {
-                    iconPrefs.isHidden = false
-                    iconPrefsDao.updateIconPrefs(iconPrefs)
+        }.show()
+    }
 
-                    toast("App removed from hidden!")
-                }
-            } else {
-                longClickAlert.positiveButton("Hide") {
-                    iconPrefs.isHidden = true
-                    iconPrefsDao.updateIconPrefs(iconPrefs)
+    private fun hideIcon(iconPrefs: IconPrefs) {
+        iconPrefs.isHidden = true
+        iconPrefsDao.addIconPrefs(iconPrefs)
+        toast("App marked as hidden!")
 
-                    toast("App marked as hidden!")
+        val showHidden = preferences.getBoolean("showHidden", false)
+        if (!showHidden) adapter.removeApp(iconPrefs.appName)
+    }
 
-                    if (!showHidden) {
-                        adapter.removeApp(app)
-                    }
-                }
-            }
-        }
-
-        longClickAlert.show()
+    private fun unHideIcon(iconPrefs: IconPrefs) {
+        iconPrefs.isHidden = false
+        iconPrefsDao.addIconPrefs(iconPrefs)
+        toast("App removed from hidden!")
     }
 
     private fun showIconPackList(app: AppDetail) {
-        val icManager = IconPackManager(this)
-        val iconPacks = icManager.availableIconPacks
+        val iconPacks = IconPackManager(this).availableIconPacks
         val iconPackNames = iconPacks.keys.toList()
 
         selector("Icon Packs", iconPackNames, { _, index ->
@@ -323,65 +249,61 @@ class MainActivity : Activity() {
                 setDefaultIcon(app)
             } else {
                 val selectedIconPack = iconPackNames[index]
-                launchIconPickerGridForSelectedPack(app.name,selectedIconPack)
+                launchIconPickerGridForSelectedPack(app.name, selectedIconPack)
             }
         })
     }
 
     private fun setDefaultIcon(app: AppDetail) {
         val iconPrefs = iconPrefsDao.getIconPrefs(app.name)
-
-        iconPrefs?.let {
-            iconPrefsDao.deleteIconPrefs(it)
-        }
+        iconPrefs?.let { iconPrefsDao.deleteIconPrefs(it) }
 
         try {
             val icon = packageManager.getApplicationIcon(app.name)
-            app.icon = icon
-            adapter.notifyDataSetChanged()
-
-            val bitmap = (icon as BitmapDrawable).bitmap
-            val dialogDrawable = BitmapDrawable(resources, Bitmap.createScaledBitmap(bitmap, 200, 200, true))
-            dialogIcon.setImageDrawable(dialogDrawable)
+            setIcon(app.name, icon)
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
     }
 
-    private fun launchIconPickerGridForSelectedPack(appName: String, selectedIconPack: String) {
-        val intent = Intent(baseContext, IconsActivity::class.java)
-        intent.putExtra("iconpack", selectedIconPack)
-        intent.putExtra("appName", appName)
-        startActivityForResult(intent, 2)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 1) {
-            loadApps()
-            loadAppGrid()
-            loadBackground()
-        } else if (requestCode == 2) {
-            if (resultCode == Activity.RESULT_OK) {
-                data?.let {
-                    val customIcon = it.getStringExtra("customicon")
-                    val appName = it.getStringExtra("appName")
-                    changeIcon(appName, customIcon)
-                }
-            }
-        }
-    }
-
-    fun changeIcon(appName: String, customIcon: String) {
-        val iconProp = customIcon.split("/")
-        val icon = IconPackManager(this).loadDrawable(iconProp[0], iconProp[1])
+    private fun setIcon(appName: String, icon: Drawable){
         val app = adapter.getApp(appName)
 
-        app.icon = icon!!
+        app.icon = icon
         adapter.notifyDataSetChanged()
 
         val bitmap = (icon as BitmapDrawable).bitmap
         val dialogDrawable = BitmapDrawable(resources, Bitmap.createScaledBitmap(bitmap, 200, 200, true))
         dialogIcon.setImageDrawable(dialogDrawable)
+    }
+
+    private fun launchIconPickerGridForSelectedPack(appName: String, selectedIconPack: String) {
+        val intent = Intent(baseContext, IconsActivity::class.java)
+        intent.putExtra("iconPack", selectedIconPack)
+        intent.putExtra("appName", appName)
+        startActivityForResult(intent, 2)
+    }
+
+    fun openSettings() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivityForResult(intent, 1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1) {
+            loadApps()
+            loadBackground()
+        } else if (requestCode == 2) {
+            if (resultCode == Activity.RESULT_OK) {
+                data?.let {
+                    val customIcon = it.getStringExtra("customIcon")
+                    val appName = it.getStringExtra("appName")
+                    val iconProp = customIcon.split("/")
+                    val icon = IconPackManager(this).loadDrawable(iconProp[0], iconProp[1])
+                    setIcon(appName, icon!!)
+                }
+            }
+        }
     }
 
     override fun onBackPressed() {}
