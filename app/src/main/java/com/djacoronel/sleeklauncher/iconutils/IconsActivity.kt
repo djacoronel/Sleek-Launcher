@@ -38,6 +38,7 @@ class IconsActivity : AppCompatActivity() {
         val packageName = getIconPackPackageName(intent.getStringExtra("iconpack"))
         val returnIntent = Intent()
         returnIntent.putExtra("customicon", customIcon + "/" + packageName)
+        returnIntent.putExtra("appName", intent.getStringExtra("appName"))
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
     }
