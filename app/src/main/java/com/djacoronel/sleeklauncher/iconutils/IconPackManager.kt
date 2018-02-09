@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import com.djacoronel.sleeklauncher.data.model.AppDetail
 import com.djacoronel.sleeklauncher.data.model.IconPrefs
-import com.djacoronel.sleeklauncher.home.MainActivity
+import com.djacoronel.sleeklauncher.data.model.IconTheme
 
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -62,11 +62,11 @@ class IconPackManager(private val mContext: Context) {
     }
 
     fun getAllIcons(packageName: String): List<String> {
-        val icons = ArrayList<String>()
+        val iconsDrawableNames = ArrayList<String>()
         val pm = mContext.packageManager
 
         try {
-            // load app drawable xml from the icon pack package
+            // loadIconThemes app drawable xml from the icon pack package
             val iconPackRes = pm.getResourcesForApplication(packageName)
             val appFilterId = iconPackRes.getIdentifier("drawable", "xml", packageName)
             val xpp = iconPackRes.getXml(appFilterId)
@@ -78,7 +78,7 @@ class IconPackManager(private val mContext: Context) {
                 while (eventType != XmlPullParser.END_DOCUMENT) {
                     if (eventType == XmlPullParser.START_TAG && xpp.name == "item") {
                         val drawableName = xpp.getAttributeValue(0)
-                        icons.add(drawableName)
+                        iconsDrawableNames.add(drawableName)
                     }
                     eventType = xpp.next()
                 }
@@ -91,83 +91,76 @@ class IconPackManager(private val mContext: Context) {
             e.printStackTrace()
         }
 
-        return icons
+        return iconsDrawableNames
     }
 
-    fun load(packageName: String): HashMap<String, String> {
-        val mPackagesDrawables = HashMap<String, String>()
-        val pm = mContext.packageManager
+    fun getAppIcon(iconPrefs: IconPrefs): Drawable {
+        val iconInfo = iconPrefs.iconName
+        val split = iconInfo.split("/")
+        val iconDrawable = split[0]
+        val iconPackage = split[1]
 
-        try {
-            // load app filter xml from the icon pack package
-            val iconPackRes = pm.getResourcesForApplication(packageName)
-            val appFilterId = iconPackRes.getIdentifier("appfilter", "xml", packageName)
-            val xpp = iconPackRes.getXml(appFilterId)
+        return loadDrawable(iconDrawable, iconPackage)!!
+    }
 
-            if (xpp != null) {
-                var eventType = xpp.eventType
+    fun getAppIcon(app: AppDetail, selectedIconPack: String): Drawable {
+        if (selectedIconPack == "")
+            return app.icon
+        else {
+            val iconThemes = loadIconThemes(selectedIconPack)
+            val componentName = "${app.name}/${app.activity}"
+            var iconTheme = iconThemes.find { it.componentName == componentName }
 
-                // Iterate through app filter xml and store component-drawable mappings
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    if (eventType == XmlPullParser.START_TAG && xpp.name == "item") {
-                        var componentName = xpp.getAttributeValue(0)
-                        val drawableName = xpp.getAttributeValue(1)
+            return if (iconTheme != null) loadDrawable(iconTheme.drawableName, selectedIconPack)!!
+            else {
+                iconTheme = iconThemes.find { it.componentName.contains(app.name) }
 
-                        val start = componentName.indexOf("{") + 1
-                        val end = if (componentName.contains("/")) componentName.indexOf("/")
-                        else componentName.indexOf("}")
-
-                        if (start != -1 && end != -1) componentName = componentName.substring(start, end)
-
-                        mPackagesDrawables.put(componentName, drawableName)
-                    }
-                    eventType = xpp.next()
-                }
+                if (iconTheme == null) app.icon
+                else loadDrawable(iconTheme.drawableName, selectedIconPack)!!
             }
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        } catch (e: XmlPullParserException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
-
-        return mPackagesDrawables
     }
 
-    fun getAppIcon(appName: String): Drawable? {
-        val selectedIconPack = (mContext as MainActivity).preferences.getString("iconPack", "")
-        val iconPrefs = mContext.iconPrefsDao.getIconPrefs(appName)
+    private var iconThemes: MutableList<IconTheme>? = null
 
-        // get custom icon
-        if (iconPrefs != null && iconPrefs.iconName != IconPrefs.NO_CUSTOM_ICON) {
-            val iconInfo = iconPrefs.iconName
-            val split = iconInfo.split("/")
-            val iconDrawable = split[0]
-            val iconPackage = split[1]
-            return loadDrawable(iconDrawable, iconPackage)
-        } else if (selectedIconPack != "") {
-            val icPackComponents = load(selectedIconPack)
+    private fun loadIconThemes(packageName: String): List<IconTheme> {
+        if (iconThemes == null) {
+            iconThemes = mutableListOf()
+            val pm = mContext.packageManager
 
-            if (icPackComponents[appName] != null && loadDrawable(icPackComponents[appName]!!, selectedIconPack) != null) {
-                return loadDrawable(icPackComponents[appName]!!, selectedIconPack)
-            } else {
-                try {
-                    return mContext.packageManager.getApplicationIcon(appName)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    e.printStackTrace()
-                }
-
-                return null
-            }
-        } else {
             try {
-                return mContext.packageManager.getApplicationIcon(appName)
+                // loadIconThemes app filter xml from the icon pack package
+                val iconPackRes = pm.getResourcesForApplication(packageName)
+                val appFilterId = iconPackRes.getIdentifier("appfilter", "xml", packageName)
+                val xpp = iconPackRes.getXml(appFilterId)
+
+                if (xpp != null) {
+                    var eventType = xpp.eventType
+
+                    // Iterate through app filter xml and store component-drawable mappings
+                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                        if (eventType == XmlPullParser.START_TAG && xpp.name == "item") {
+                            var componentName = xpp.getAttributeValue(0)
+                            val drawableName = xpp.getAttributeValue(1)
+
+                            val start = componentName.indexOf("{") + 1
+                            val end = componentName.indexOf("}")
+
+                            if (start != -1 && end != -1) componentName = componentName.substring(start, end)
+                            iconThemes!!.add(IconTheme(componentName, drawableName))
+                        }
+                        eventType = xpp.next()
+                    }
+                }
             } catch (e: PackageManager.NameNotFoundException) {
                 e.printStackTrace()
+            } catch (e: XmlPullParserException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
+        }
 
-            return null
-        }// get themed icon if available
+        return iconThemes!!
     }
 }

@@ -8,7 +8,7 @@ import android.arch.persistence.room.PrimaryKey
 */
 
 @Entity
-class IconPrefs(var appName: String) {
+class IconPrefs(var appName: String, var activity:String) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
     var isHidden: Boolean = false

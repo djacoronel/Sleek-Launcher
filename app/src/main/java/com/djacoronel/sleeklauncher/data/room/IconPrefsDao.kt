@@ -9,14 +9,14 @@ import com.djacoronel.sleeklauncher.data.model.IconPrefs
 */
 
 @Dao
-interface IconPrefsDao{
+interface IconPrefsDao {
     @Query("SELECT * FROM iconPrefs")
     fun getAllIconPrefs(): List<IconPrefs>
 
-    @Query("SELECT * FROM iconPrefs WHERE appName = :appName")
-    fun getIconPrefs(appName: String): IconPrefs?
+    @Query("SELECT * FROM iconPrefs WHERE activity = :activity")
+    fun getIconPrefs(activity: String): IconPrefs?
 
-    @Insert (onConflict = REPLACE)
+    @Insert(onConflict = REPLACE)
     fun addIconPrefs(iconPrefs: IconPrefs)
 
     @Update(onConflict = REPLACE)

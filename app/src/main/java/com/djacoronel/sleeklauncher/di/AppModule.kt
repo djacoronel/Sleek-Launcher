@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import com.djacoronel.sleeklauncher.data.room.AppDatabase
 import com.djacoronel.sleeklauncher.data.room.IconPrefsDao
+import com.djacoronel.sleeklauncher.iconutils.IconPackManager
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -33,4 +34,8 @@ class AppModule {
     @Provides
     @Singleton
     fun provideIconPrefsDao(database: AppDatabase): IconPrefsDao = database.iconPrefsDao()
+
+    @Provides
+    @Singleton
+    fun provideIconPackManager(context: Context): IconPackManager = IconPackManager(context)
 }

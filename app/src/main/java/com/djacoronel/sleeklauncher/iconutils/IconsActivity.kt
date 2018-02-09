@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import com.djacoronel.sleeklauncher.R
 import kotlinx.android.synthetic.main.icon_grid.*
+import org.jetbrains.anko.toast
 
 class IconsActivity : AppCompatActivity() {
 
@@ -38,7 +39,8 @@ class IconsActivity : AppCompatActivity() {
         val packageName = getIconPackPackageName(intent.getStringExtra("iconPack"))
         val returnIntent = Intent()
         returnIntent.putExtra("customIcon", customIcon + "/" + packageName)
-        returnIntent.putExtra("appName", intent.getStringExtra("appName"))
+        returnIntent.putExtra("activityName", intent.getStringExtra("activityName"))
+        toast(customIcon)
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
     }

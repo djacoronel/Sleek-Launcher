@@ -7,7 +7,8 @@ import android.graphics.drawable.Drawable
 */
 
 class AppDetail(
-        var label:String,
-        var name:String,
+        var label: String,
+        var name: String,
+        var activity: String,
         var icon: Drawable
 )

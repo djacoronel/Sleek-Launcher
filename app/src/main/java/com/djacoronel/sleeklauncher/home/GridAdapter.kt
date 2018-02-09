@@ -40,13 +40,13 @@ class GridAdapter(private val apps: List<AppDetail>, private val mContext: Conte
 
     override fun getItemCount(): Int = apps.size
 
-    fun getApp(appName: String): AppDetail {
-        val app = apps.find { it.name == appName }
+    fun getApp(appActivityName: String): AppDetail {
+        val app = apps.find { it.activity == appActivityName }
         return app!!
     }
 
-    fun removeApp(appName: String) {
-        val app = apps.find { it.name == appName }
+    fun removeApp(appActivityName: String) {
+        val app = apps.find { it.activity == appActivityName }
         val index = apps.indexOf(app)
         (apps as MutableList).removeAt(index)
         notifyItemRemoved(index)
