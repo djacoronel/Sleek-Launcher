@@ -152,7 +152,7 @@ class MainActivity : Activity() {
             }
         }
 
-        Collections.sort(apps) { a1, a2 -> a1.label.compareTo(a2.label, true) }
+        apps.sortWith(Comparator { a1, a2 -> a1.label.compareTo(a2.label, true) })
         loadAppGrid(apps)
     }
 

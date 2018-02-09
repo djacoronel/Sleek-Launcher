@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import android.util.Log
 import com.djacoronel.sleeklauncher.data.model.AppDetail
 import com.djacoronel.sleeklauncher.data.model.IconPrefs
 import com.djacoronel.sleeklauncher.data.model.IconTheme
@@ -54,8 +56,12 @@ class IconPackManager(private val mContext: Context) {
         return try {
             val iconPackRes = pm.getResourcesForApplication(packageName)
             val id = iconPackRes!!.getIdentifier(drawableName, "drawable", packageName)
+            Log.i(drawableName, packageName)
             iconPackRes.getDrawable(id)
         } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            null
+        } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
             null
         }
@@ -104,19 +110,21 @@ class IconPackManager(private val mContext: Context) {
     }
 
     fun getAppIcon(app: AppDetail, selectedIconPack: String): Drawable {
-        if (selectedIconPack == "")
-            return app.icon
+        return if (selectedIconPack == "")
+            app.icon
         else {
             val iconThemes = loadIconThemes(selectedIconPack)
             val componentName = "${app.name}/${app.activity}"
             var iconTheme = iconThemes.find { it.componentName == componentName }
 
-            return if (iconTheme != null) loadDrawable(iconTheme.drawableName, selectedIconPack)!!
+            if (iconTheme != null && loadDrawable(iconTheme.drawableName, selectedIconPack) != null)
+                loadDrawable(iconTheme.drawableName, selectedIconPack)!!
             else {
                 iconTheme = iconThemes.find { it.componentName.contains(app.name) }
 
-                if (iconTheme == null) app.icon
-                else loadDrawable(iconTheme.drawableName, selectedIconPack)!!
+                if (iconTheme != null && loadDrawable(iconTheme.drawableName, selectedIconPack) != null)
+                    loadDrawable(iconTheme.drawableName, selectedIconPack)!!
+                else app.icon
             }
         }
     }
