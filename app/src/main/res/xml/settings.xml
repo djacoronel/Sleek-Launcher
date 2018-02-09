@@ -21,8 +21,8 @@
 
     <Preference
       android:key="backgroundPref"
-      android:summary="Change background color, transparency and blur"
-      android:title="Background Settings"/>
+      android:summary="Change launcher background color, transparency and blur"
+      android:title="Background"/>
 
   </PreferenceCategory>
 </PreferenceScreen>

@@ -9,4 +9,5 @@
     <item name="android:windowTranslucentStatus">true</item>
     <item name="android:colorBackground">@android:color/black</item>
   </style>
+
 </resources>

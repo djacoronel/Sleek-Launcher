@@ -48,13 +48,13 @@ class BackgroundSettingsActivity : Activity() {
         //Tab 1
         var spec: TabHost.TabSpec = tabHost.newTabSpec("Tab One")
         spec.setContent(R.id.tab1)
-        spec.setIndicator("Color")
+        spec.setIndicator("Color Filter")
         tabHost.addTab(spec)
 
         //Tab 2
         spec = tabHost.newTabSpec("Tab Two")
         spec.setContent(R.id.tab2)
-        spec.setIndicator("Blur")
+        spec.setIndicator("Blur Filter")
         tabHost.addTab(spec)
     }
 
