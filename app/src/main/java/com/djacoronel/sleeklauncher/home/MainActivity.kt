@@ -57,7 +57,6 @@ class MainActivity : Activity() {
         loadApps()
         setupGridRefreshing()
 
-
         // This makes status bar and navigation bar transparent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -96,10 +95,15 @@ class MainActivity : Activity() {
     private fun cropWallpaper(wallpaper: Bitmap): Bitmap {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+        val x = 0
+        val y = 0
         val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
 
-        return Bitmap.createBitmap(wallpaper, 0, 0, width, height)
+        return if (wallpaper.width < (x + width) || wallpaper.height < (y + height))
+            wallpaper
+        else
+            Bitmap.createBitmap(wallpaper, x, y, width, height)
     }
 
     private fun setupBackgroundRefreshing() {
