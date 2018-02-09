@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TabHost

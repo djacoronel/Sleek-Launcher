@@ -1,23 +1,16 @@
 package com.djacoronel.sleeklauncher.settings
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.ListPreference
-import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceFragment
-
 import com.djacoronel.sleeklauncher.R
 import com.djacoronel.sleeklauncher.data.room.IconPrefsDao
 import com.djacoronel.sleeklauncher.iconutils.IconPackManager
-
 import dagger.android.AndroidInjection
 import org.jetbrains.anko.alert
-import java.util.HashMap
 import javax.inject.Inject
 
 class SettingsActivity : PreferenceActivity() {

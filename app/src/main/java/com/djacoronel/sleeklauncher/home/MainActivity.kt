@@ -57,9 +57,12 @@ class MainActivity : Activity() {
         loadApps()
         setupGridRefreshing()
 
+
         // This makes status bar and navigation bar transparent
-        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        }
     }
 
     private fun loadBackground() {
@@ -68,34 +71,26 @@ class MainActivity : Activity() {
         val argb = intArrayOf(argbBlur[0].toInt(), argbBlur[1].toInt(), argbBlur[2].toInt(), argbBlur[3].toInt())
         val blur = argbBlur[4].toInt()
 
-        if (blur == 0) loadBackgroundWithColorFilter(argb)
-        else loadBackgroundWithBlur(argb, blur)
-    }
-
-    private fun loadBackgroundWithColorFilter(argb: IntArray) {
-        mainBackground.visibility = View.GONE
-        window.decorView.setBackgroundColor(Color.argb(argb[0], argb[1], argb[2], argb[3]))
+        loadBackgroundWithBlur(argb, blur)
     }
 
     private fun loadBackgroundWithBlur(argb: IntArray, blur: Int) {
         val wallpaperDrawable = WallpaperManager.getInstance(this).drawable
-        var blurredBitmap = cropWallpaper((wallpaperDrawable as BitmapDrawable).bitmap)
+
+        var blurredBitmap =
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) (wallpaperDrawable as BitmapDrawable).bitmap
+                else cropWallpaper((wallpaperDrawable as BitmapDrawable).bitmap)
 
         val numberOfFullBlur = blur / 25
         val remainingBlur = blur % 25
 
-        for (i in 0 until numberOfFullBlur) {
-            blurredBitmap = BlurBuilder().blur(this, blurredBitmap, 25f)
-        }
-
-        if (remainingBlur != 0) {
-            blurredBitmap = BlurBuilder().blur(this, blurredBitmap, remainingBlur.toFloat())
-        }
+        for (i in 0 until numberOfFullBlur) blurredBitmap = BlurBuilder().blur(this, blurredBitmap, 25f)
+        if (remainingBlur != 0) blurredBitmap = BlurBuilder().blur(this, blurredBitmap, remainingBlur.toFloat())
 
         mainBackground.visibility = View.VISIBLE
         mainBackground.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]))
         mainBackground.setImageDrawable(BitmapDrawable(resources, blurredBitmap))
-        mainBackground.scaleType = ImageView.ScaleType.FIT_CENTER
+        mainBackground.scaleType = ImageView.ScaleType.CENTER_CROP
     }
 
     private fun cropWallpaper(wallpaper: Bitmap): Bitmap {
@@ -177,7 +172,7 @@ class MainActivity : Activity() {
         val br = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 loadApps()
-                val uid = intent.getIntExtra(EXTRA_UID,0)
+                val uid = intent.getIntExtra(EXTRA_UID, 0)
                 val name = packageManager.getNameForUid(uid)
             }
         }
@@ -203,13 +198,11 @@ class MainActivity : Activity() {
         val width = v.measuredWidth
         val height = v.measuredHeight
 
-        return if (Build.VERSION.SDK_INT >= 23) {
-            // Use reveal animation if Marshmallow
+        // Use reveal animation if Marshmallow
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             ActivityOptions.makeClipRevealAnimation(v, left, top, width, height)
-        } else {
-            // Use a scale up animation for lower versions
+        else
             ActivityOptions.makeScaleUpAnimation(v, left, top, width, height)
-        }
     }
 
     fun iconLongClick(app: AppDetail) {

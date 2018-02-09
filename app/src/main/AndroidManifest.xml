@@ -16,7 +16,7 @@
       android:launchMode="singleTask"
       android:name=".home.MainActivity"
       android:screenOrientation="portrait"
-      android:theme="@style/AppTheme.Wallpaper">
+      android:theme="@style/AppTheme">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
