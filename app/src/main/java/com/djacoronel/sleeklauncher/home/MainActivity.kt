@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
@@ -163,8 +164,10 @@ class MainActivity : Activity() {
     }
 
     private fun loadAppGrid(apps: List<AppDetail>) {
+        val rowCount = preferences.getString("rowCount","4").toInt()
         adapter = GridAdapter(apps, this)
-        app_grid.layoutManager = GridLayoutManager(this, 4)
+        app_grid.layoutManager = GridLayoutManager(this, rowCount)
+        app_grid.setHasFixedSize(true)
         app_grid.adapter = adapter
     }
 

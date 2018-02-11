@@ -32,6 +32,7 @@ class SettingsActivity : PreferenceActivity() {
 
             addPreferencesFromResource(R.xml.settings)
             setupCustomListPref()
+            setupRowCountList()
             setupResetPref()
             setupBgPref()
         }
@@ -75,9 +76,39 @@ class SettingsActivity : PreferenceActivity() {
                 val editor = sharedPref.edit()
                 editor.putString(customListPref.key, "")
                 editor.apply()
+                customListPref.summary = "Default"
             }
 
             return customListPref
+        }
+
+        private fun setupRowCountList(){
+            val rowCountPref = findPreference("rowCount") as ListPreference
+
+            rowCountPref.dialogTitle = "Choose number of rows"
+            rowCountPref.isPersistent = true
+
+            rowCountPref.entries = arrayOf("3","4","5","6")
+            rowCountPref.entryValues = arrayOf("3","4","5","6")
+
+            rowCountPref.setOnPreferenceChangeListener { _, rowCount ->
+                setRowCountPref(rowCount.toString().toInt())
+                false
+            }
+
+            setSavedPrefSummary(rowCountPref)
+        }
+
+        private fun setRowCountPref(rowCount: Int){
+            val customListPref = findPreference("rowCount") as ListPreference
+            val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.putString(customListPref.key, rowCount.toString())
+            editor.apply()
+
+            val summary = rowCount.toString()
+            customListPref.summary = summary
+            customListPref.setValueIndex(customListPref.findIndexOfValue(rowCount.toString()))
         }
 
         private fun setupResetPref() {
