@@ -8,6 +8,7 @@ import android.content.Intent.EXTRA_UID
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -164,7 +165,7 @@ class MainActivity : Activity() {
     }
 
     private fun loadAppGrid(apps: List<AppDetail>) {
-        val rowCount = preferences.getString("rowCount","4").toInt()
+        val rowCount = preferences.getString("rowCount", "4").toInt()
         adapter = GridAdapter(apps, this)
         app_grid.layoutManager = GridLayoutManager(this, rowCount)
         app_grid.setHasFixedSize(true)
@@ -214,7 +215,7 @@ class MainActivity : Activity() {
 
     fun iconLongClick(app: AppDetail) {
         dialogIcon = ImageView(this)
-        val bitmap = (app.icon as BitmapDrawable).bitmap
+        val bitmap = getBitmapFromDrawable(app.icon)
         val icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(bitmap, 200, 200, true))
         dialogIcon.setImageDrawable(icon)
         dialogIcon.setOnClickListener { showIconPackList(app) }
@@ -238,6 +239,14 @@ class MainActivity : Activity() {
                 else positiveButton("Show") { unHideIcon(iconPrefs) }
             }
         }.show()
+    }
+
+    private fun getBitmapFromDrawable(drawable:Drawable): Bitmap {
+        val bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888)
+        val canvas = Canvas (bmp)
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas)
+        return bmp
     }
 
     private fun hideIcon(iconPrefs: IconPrefs) {
