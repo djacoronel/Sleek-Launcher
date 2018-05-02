@@ -15,8 +15,8 @@
       android:title="Icon Pack"/>
 
     <ListPreference
-      android:key="rowCount"
-      android:title="Icon Rows"/>
+      android:key="columnCount"
+      android:title="Icon Columns"/>
 
     <Preference
       android:key="resetIcons"

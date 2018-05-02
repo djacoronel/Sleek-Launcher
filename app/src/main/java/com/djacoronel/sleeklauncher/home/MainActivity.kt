@@ -1,5 +1,6 @@
 package com.djacoronel.sleeklauncher.home
 
+import android.Manifest
 import android.app.Activity
 import android.app.ActivityOptions
 import android.app.WallpaperManager
@@ -15,8 +16,9 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
@@ -53,9 +55,8 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         AndroidInjection.inject(this)
         setContentView(R.layout.activity_main)
-
+        requestPermission()
         loadBackground()
-        setupBackgroundRefreshing()
         loadApps()
         setupGridRefreshing()
 
@@ -66,7 +67,24 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun loadBackground() {
+    private fun requestPermission() {
+        val storagePermission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+
+        if (storagePermission != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
+    }
+
+    private fun loadBackground(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            loadBackgroundPrefs()
+            setupBackgroundRefreshing()
+        }
+    }
+
+    private fun loadBackgroundPrefs() {
         val bgPref = preferences.getString("bgPref", "0,0,0,0,0")
         val argbBlur = bgPref.split(",")
         val argb = intArrayOf(argbBlur[0].toInt(), argbBlur[1].toInt(), argbBlur[2].toInt(), argbBlur[3].toInt())
@@ -114,7 +132,7 @@ class MainActivity : Activity() {
 
         val br = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                loadBackground()
+                loadBackgroundPrefs()
             }
         }
 
@@ -165,7 +183,7 @@ class MainActivity : Activity() {
     }
 
     private fun loadAppGrid(apps: List<AppDetail>) {
-        val rowCount = preferences.getString("rowCount", "4").toInt()
+        val rowCount = preferences.getString("columnCount", "4").toInt()
         adapter = GridAdapter(apps, this)
         app_grid.layoutManager = GridLayoutManager(this, rowCount)
         app_grid.setHasFixedSize(true)
@@ -241,10 +259,10 @@ class MainActivity : Activity() {
         }.show()
     }
 
-    private fun getBitmapFromDrawable(drawable:Drawable): Bitmap {
-        val bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888)
-        val canvas = Canvas (bmp)
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+    private fun getBitmapFromDrawable(drawable: Drawable): Bitmap {
+        val bmp = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
         return bmp
     }
@@ -315,8 +333,9 @@ class MainActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 1) {
-            loadApps()
             loadBackground()
+            loadApps()
+            setupGridRefreshing()
         } else if (requestCode == 2) {
             if (resultCode == Activity.RESULT_OK) {
                 data?.let {

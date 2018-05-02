@@ -1,16 +1,21 @@
 package com.djacoronel.sleeklauncher.settings
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceFragment
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import com.djacoronel.sleeklauncher.R
 import com.djacoronel.sleeklauncher.data.room.IconPrefsDao
 import com.djacoronel.sleeklauncher.iconutils.IconPackManager
 import dagger.android.AndroidInjection
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.toast
 import javax.inject.Inject
 
 class SettingsActivity : PreferenceActivity() {
@@ -32,7 +37,7 @@ class SettingsActivity : PreferenceActivity() {
 
             addPreferencesFromResource(R.xml.settings)
             setupCustomListPref()
-            setupRowCountList()
+            setupColumnCountList()
             setupResetPref()
             setupBgPref()
         }
@@ -42,7 +47,7 @@ class SettingsActivity : PreferenceActivity() {
 
             customListPref.dialogTitle = "Available Icon Packs"
             customListPref.isPersistent = true
-            customListPref.setOnPreferenceChangeListener{ _, newValue ->
+            customListPref.setOnPreferenceChangeListener { _, newValue ->
                 setIconPackPref(newValue as String)
                 false
             }
@@ -82,33 +87,33 @@ class SettingsActivity : PreferenceActivity() {
             return customListPref
         }
 
-        private fun setupRowCountList(){
-            val rowCountPref = findPreference("rowCount") as ListPreference
+        private fun setupColumnCountList() {
+            val columnCountPref = findPreference("columnCount") as ListPreference
 
-            rowCountPref.dialogTitle = "Choose number of rows"
-            rowCountPref.isPersistent = true
+            columnCountPref.dialogTitle = "Choose number of columns"
+            columnCountPref.isPersistent = true
 
-            rowCountPref.entries = arrayOf("3","4","5","6")
-            rowCountPref.entryValues = arrayOf("3","4","5","6")
+            columnCountPref.entries = arrayOf("3", "4", "5", "6")
+            columnCountPref.entryValues = arrayOf("3", "4", "5", "6")
 
-            rowCountPref.setOnPreferenceChangeListener { _, rowCount ->
-                setRowCountPref(rowCount.toString().toInt())
+            columnCountPref.setOnPreferenceChangeListener { _, columnCount ->
+                setColumnCountPref(columnCount.toString().toInt())
                 false
             }
 
-            setSavedPrefSummary(rowCountPref)
+            setSavedPrefSummary(columnCountPref)
         }
 
-        private fun setRowCountPref(rowCount: Int){
-            val customListPref = findPreference("rowCount") as ListPreference
+        private fun setColumnCountPref(columnCount: Int) {
+            val customListPref = findPreference("columnCount") as ListPreference
             val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
             val editor = sharedPref.edit()
-            editor.putString(customListPref.key, rowCount.toString())
+            editor.putString(customListPref.key, columnCount.toString())
             editor.apply()
 
-            val summary = rowCount.toString()
+            val summary = columnCount.toString()
             customListPref.summary = summary
-            customListPref.setValueIndex(customListPref.findIndexOfValue(rowCount.toString()))
+            customListPref.setValueIndex(customListPref.findIndexOfValue(columnCount.toString()))
         }
 
         private fun setupResetPref() {
@@ -130,10 +135,25 @@ class SettingsActivity : PreferenceActivity() {
         private fun setupBgPref() {
             val bgPref = findPreference("backgroundPref")
             bgPref.setOnPreferenceClickListener {
-                val intent = Intent(activity.applicationContext, BackgroundSettingsActivity::class.java)
-                startActivity(intent)
+                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    val intent = Intent(activity.applicationContext, BackgroundSettingsActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    toast("Storage access needed for background settings. Enable permission in app settings.")
+                    requestPermission()
+                }
                 false
             }
+        }
+
+        private fun requestPermission() {
+            val storagePermission = ContextCompat.checkSelfPermission(activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+
+            if (storagePermission != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(activity,
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
         }
 
         private fun setIconPackPref(newValue: String) {
