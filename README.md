@@ -1,5 +1,5 @@
 # Sleek Launcher
-This is just a simplistic launcher that is basically just an app drawer. Also meant as a learning opportunity in creating an android homescreen replacement type of app. Tested only on api 19 and up.
+This is just a simplistic launcher that is basically just an app drawer. Also meant as a learning opportunity in creating an android homescreen replacement type of app.
 
 Uses:
 - Kotlin
