@@ -106,12 +106,14 @@ class MainActivity : Activity() {
         doAsync {
             for (i in 0 until numberOfFullBlur) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, 25f)
             if (remainingBlur != 0) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, remainingBlur.toFloat())
-        }
 
-        mainBackground.visibility = View.VISIBLE
-        mainBackground.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]))
-        mainBackground.setImageDrawable(BitmapDrawable(resources, blurredBitmap))
-        mainBackground.scaleType = ImageView.ScaleType.CENTER_CROP
+            uiThread{
+                mainBackground.visibility = View.VISIBLE
+                mainBackground.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]))
+                mainBackground.setImageDrawable(BitmapDrawable(resources, blurredBitmap))
+                mainBackground.scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+        }
     }
 
     private fun cropWallpaper(wallpaper: Bitmap): Bitmap {
