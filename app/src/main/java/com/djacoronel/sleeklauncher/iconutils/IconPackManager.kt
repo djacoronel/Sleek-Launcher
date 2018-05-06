@@ -24,7 +24,7 @@ class IconPackManager(private val mContext: Context) {
     val availableIconPacks: HashMap<String, String>
         get() {
             val iconPacks = HashMap<String, String>()
-            iconPacks.put("Default", "")
+            iconPacks["Default"] = ""
 
             val rInfos = iconPackRInfos
             for (ri in rInfos) {

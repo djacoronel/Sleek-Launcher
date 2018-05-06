@@ -22,6 +22,8 @@ import android.support.v7.widget.GridLayoutManager
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AnimationUtils
+import android.view.animation.LayoutAnimationController
 import android.widget.ImageView
 import com.djacoronel.sleeklauncher.R
 import com.djacoronel.sleeklauncher.data.model.AppDetail
@@ -34,9 +36,7 @@ import com.djacoronel.sleeklauncher.settings.SettingsActivity
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_grid.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.selector
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 import java.util.*
 import javax.inject.Inject
 
@@ -76,7 +76,7 @@ class MainActivity : Activity() {
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
     }
 
-    private fun loadBackground(){
+    private fun loadBackground() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             loadBackgroundPrefs()
@@ -103,8 +103,10 @@ class MainActivity : Activity() {
         val numberOfFullBlur = blur / 25
         val remainingBlur = blur % 25
 
-        for (i in 0 until numberOfFullBlur) blurredBitmap = BlurBuilder().blur(this, blurredBitmap, 25f)
-        if (remainingBlur != 0) blurredBitmap = BlurBuilder().blur(this, blurredBitmap, remainingBlur.toFloat())
+        doAsync {
+            for (i in 0 until numberOfFullBlur) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, 25f)
+            if (remainingBlur != 0) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, remainingBlur.toFloat())
+        }
 
         mainBackground.visibility = View.VISIBLE
         mainBackground.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]))
@@ -140,6 +142,7 @@ class MainActivity : Activity() {
     }
 
     private fun loadApps() {
+
         val showHidden = preferences.getBoolean("showHidden", false)
         val selectedIconPack = preferences.getString("iconPack", "")
 
@@ -147,33 +150,36 @@ class MainActivity : Activity() {
         val availableActivities = getInstalledAppsInfo()
         val apps = mutableListOf<AppDetail>()
 
-        for (ri in availableActivities) {
-            val name = ri.activityInfo.packageName
-            val activityName = ri.activityInfo.name
-            val label = ri.loadLabel(manager) as String
-            val icon = ri.loadIcon(manager)
+        doAsync {
+            for (ri in availableActivities) {
+                val name = ri.activityInfo.packageName
+                val activityName = ri.activityInfo.name
+                val label = ri.loadLabel(manager) as String
+                val icon = ri.loadIcon(manager)
 
-            val app = AppDetail(label, name, activityName, icon)
-            val iconPrefs = iconPrefsDao.getIconPrefs(activityName)
+                val app = AppDetail(label, name, activityName, icon)
+                val iconPrefs = iconPrefsDao.getIconPrefs(activityName)
 
-            iconPrefs?.let {
-                if (!it.isHidden || showHidden) {
-                    if (it.iconName != IconPrefs.NO_CUSTOM_ICON) app.icon = iconPackManager.getAppIcon(it)
-                    else app.icon = iconPackManager.getAppIcon(app, selectedIconPack)
+                iconPrefs?.let {
+                    if (!it.isHidden || showHidden) {
+                        if (it.iconName != IconPrefs.NO_CUSTOM_ICON) app.icon = iconPackManager.getAppIcon(it)
+                        else app.icon = iconPackManager.getAppIcon(app, selectedIconPack)
 
-                    if (it.label != IconPrefs.NO_CUSTOM_LABEL) app.label = it.label
+                        if (it.label != IconPrefs.NO_CUSTOM_LABEL) app.label = it.label
+                        apps.add(app)
+                    }
+                }
+
+                if (iconPrefs == null) {
+                    app.icon = iconPackManager.getAppIcon(app, selectedIconPack)
                     apps.add(app)
                 }
             }
 
-            if (iconPrefs == null) {
-                app.icon = iconPackManager.getAppIcon(app, selectedIconPack)
-                apps.add(app)
-            }
+            apps.sortWith(Comparator { a1, a2 -> a1.label.compareTo(a2.label, true) })
+            uiThread { loadAppGrid(apps) }
         }
 
-        apps.sortWith(Comparator { a1, a2 -> a1.label.compareTo(a2.label, true) })
-        loadAppGrid(apps)
     }
 
     private fun getInstalledAppsInfo(): List<ResolveInfo> {
@@ -185,7 +191,11 @@ class MainActivity : Activity() {
     private fun loadAppGrid(apps: List<AppDetail>) {
         val rowCount = preferences.getString("columnCount", "4").toInt()
         adapter = GridAdapter(apps, this)
+
+        val resId = R.anim.grid_layout_animation_from_bottom
+        val animation = AnimationUtils.loadLayoutAnimation(ctx, resId)
         app_grid.layoutManager = GridLayoutManager(this, rowCount)
+        app_grid.layoutAnimation = animation
         app_grid.setHasFixedSize(true)
         app_grid.adapter = adapter
     }
