@@ -7,17 +7,13 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.util.Log
 import com.djacoronel.sleeklauncher.data.model.AppDetail
 import com.djacoronel.sleeklauncher.data.model.IconPrefs
 import com.djacoronel.sleeklauncher.data.model.IconTheme
-
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-
 import java.io.IOException
-import java.util.ArrayList
-import java.util.HashMap
+import java.util.*
 
 class IconPackManager(private val mContext: Context) {
 
@@ -56,7 +52,6 @@ class IconPackManager(private val mContext: Context) {
         return try {
             val iconPackRes = pm.getResourcesForApplication(packageName)
             val id = iconPackRes!!.getIdentifier(drawableName, "drawable", packageName)
-            Log.i(drawableName, packageName)
             iconPackRes.getDrawable(id)
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()

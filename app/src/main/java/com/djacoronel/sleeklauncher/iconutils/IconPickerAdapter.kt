@@ -30,8 +30,10 @@ class IconPickerAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val icManager = IconPackManager(mContext)
-        val icon = icManager.loadDrawable(icons[position], iconPack) as Drawable
-        holder.bind(icon)
+        val icon = icManager.loadDrawable(icons[position], iconPack)
+        icon?.let {
+            holder.bind(it)
+        }
     }
 
     override fun getItemCount(): Int = icons.size
