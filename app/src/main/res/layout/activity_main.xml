@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/activity_main"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context="com.djacoronel.sleeklauncher.home.MainActivity">
+  <ImageView
+    android:id="@+id/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.djacoronel.sleeklauncher.home.MainActivity">
-    <ImageView
-        android:id="@+id/mainBackground"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/main_background_content_description" />
-    <include layout="@layout/app_grid" />
+    android:contentDescription="@string/main_background_content_description"/>
+  <include layout="@layout/app_grid"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom"
-        android:background="@drawable/bottom_gradient" />
+  <View
+    android:id="@+id/footer_shadow"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:layout_gravity="bottom"
+    android:background="@drawable/bottom_gradient"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="top"
-        android:background="@drawable/top_gradient" />
+  <View
+    android:id="@+id/header_shadow"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:layout_gravity="top"
+    android:background="@drawable/top_gradient"/>
 </FrameLayout>

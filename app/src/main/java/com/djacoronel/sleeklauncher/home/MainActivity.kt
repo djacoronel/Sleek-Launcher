@@ -59,6 +59,7 @@ class MainActivity : Activity() {
         loadBackground()
         loadApps()
         setupGridRefreshing()
+        setupShadows()
 
         // This makes status bar and navigation bar transparent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -107,7 +108,7 @@ class MainActivity : Activity() {
             for (i in 0 until numberOfFullBlur) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, 25f)
             if (remainingBlur != 0) blurredBitmap = BlurBuilder().blur(this@MainActivity, blurredBitmap, remainingBlur.toFloat())
 
-            uiThread{
+            uiThread {
                 mainBackground.visibility = View.VISIBLE
                 mainBackground.setColorFilter(Color.argb(argb[0], argb[1], argb[2], argb[3]))
                 mainBackground.setImageDrawable(BitmapDrawable(resources, blurredBitmap))
@@ -215,6 +216,18 @@ class MainActivity : Activity() {
             }
         }
         this.registerReceiver(br, intentFilter)
+    }
+
+    private fun setupShadows() {
+        val showShadows = preferences.getBoolean("showShadows", false)
+
+        if (showShadows) {
+            header_shadow.visibility = View.VISIBLE
+            footer_shadow.visibility = View.VISIBLE
+        } else {
+            header_shadow.visibility = View.GONE
+            footer_shadow.visibility = View.GONE
+        }
     }
 
     fun launchApp(app: AppDetail, v: View) {
@@ -348,6 +361,7 @@ class MainActivity : Activity() {
             loadBackground()
             loadApps()
             setupGridRefreshing()
+            setupShadows()
         } else if (requestCode == 2) {
             if (resultCode == Activity.RESULT_OK) {
                 data?.let {

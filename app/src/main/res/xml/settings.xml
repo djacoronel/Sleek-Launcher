@@ -28,5 +28,10 @@
       android:summary="Change launcher background color, transparency and blur"
       android:title="Background"/>
 
+    <CheckBoxPreference
+      android:key="showShadows"
+      android:summary="Enable or disable homescreen shadows"
+      android:title="Homescreen shadow"/>
+
   </PreferenceCategory>
 </PreferenceScreen>
